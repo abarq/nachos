@@ -29,7 +29,9 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <iostream>
 
+using namespace std;
 //En Exit() debe haber un Signal de un semaforo para que le 'avise' a Join() para que siga ejecutandose.
 
 
@@ -97,8 +99,12 @@ void Nachos_Open(){
 	printf("El buffer es: %s\n", buffer);
 	printf("\n");
 	int descriptor = open(buffer,O_RDWR);   //Llamado de open de Unix, devuelve un descriptor de la tabla de archivos abiertos.
-	printf("%d\n", descriptor);
+
+	char* string = new char[20];
+	int byteLeidos = read(descriptor,string,5);
+	printf("ByLei en Open : %d\n", byteLeidos);
 	int respuestaOpen = currentThread->openFilesTable->Open(descriptor); //Devuelve si el metodo opn fue exitoso.
+	currentThread->openFilesTable->Print();
 	printf("%d\n", respuestaOpen);
 
 	if(respuestaOpen == -1){  //En caso de que devuelve
@@ -112,7 +118,6 @@ void Nachos_Open(){
 	printf("Antes de returnFromSystemCall\n");
 	machine->WriteRegister(2,respuestaOpen);
 	printf("FINAL FINAL\n");
-	delete[] buffer;
 	
 }
 
@@ -146,25 +151,20 @@ void Nachos_Write(){
 
 		default:	// All other opened files
 			
-			printf("Estoy en default\n");
-	  		fflush(stdout);
+
 			if(!(currentThread->openFilesTable->isOpened(id))){
 				
 				machine->WriteRegister(2,-1);
-				
+
 			}else{
 			
-				int temp;
-			        for(int i=0; i<size; i++){
-           				 machine->ReadMem((int)machine->ReadRegister(4)+i, 1, &temp);   // Lee un caracter
-            				 buffer[i]= (char)temp;                                         // y lo guarda en el buffer
-          				 printf("%c", buffer[i]);
-       				 }
+      				char* buffer2 = NULL;            // Buffer donde se almacenan temporalmente los datos
+				buffer2 = leerEntrada();
 
 				int unixHandle = currentThread->openFilesTable->getUnixHandle(id);
 
-				int cantidadCaracteresEscritos = write(unixHandle, buffer, size);
-
+				int cantidadCaracteresEscritos = write(unixHandle, buffer2, size);
+				printf("la cantidad de caracteres escritos es: %d\n",unixHandle);
 				stats->numDiskWrites++; //Actualiza las estadisticas de escritura en stats.
 	
 			break;
@@ -180,8 +180,9 @@ void Nachos_Read(){
 
 
 	int bytesLeidos;
-	int size = machine->ReadRegister( 5 );
+
 	OpenFileId id = machine->ReadRegister( 6 );
+	printf("El id es: %d\n", id);
 
 	if((id<0) || (id == ConsoleOutput)||(!(currentThread->openFilesTable->openFilesMap->Test(id)))){
 
@@ -190,15 +191,19 @@ void Nachos_Read(){
 
 	}else{
 
-		int unixHandle = currentThread->openFilesTable->getUnixHandle(id);
-		int bytesLeidos = read(unixHandle, buffer, size);
 		char* buffer = (char*)machine->ReadRegister(4);             // Direccion donde se guardara los datos leidos
+		int unixHandle = currentThread->openFilesTable->getUnixHandle(id);
+		int size = machine->ReadRegister( 5 );
 		char* temp = new char[size];
 
-		for(int i = 0; i < tam; i++){ 
+		bytesLeidos = read(unixHandle, temp, size);
+	
+		printf("La cantidad de bytes leidos son: %d\n",bytesLeidos);
 
-         		machine->WriteMem((int)buffer + i, 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
-      		}
+		//for(int i = 0; i < size; i++){ 
+
+         	//	machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
+      		//}
 		
 		delete[] temp;
 		
@@ -273,8 +278,19 @@ void Nachos_Join(){
 
 void Nachos_Exec(){
 
+	char* nombreEjecutable = leerEntrada();
+	OpenFile *executable = fileSystem->Open(nombreEjecutable); 	
 
-	returnFromSystemCall();
+  	if (executable == NULL) { 
+                                    // Si el archivo no existe 
+		printf("No se puede abrir el archivo %s\n", nombreExe);
+      	  machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
+		return -1;
+
+   	}
+
+
+
 }
 
 void Nachos_Yield(){
@@ -289,7 +305,7 @@ void Nachos_Fork(){
 	returnFromSystemCall();
 }
 
-void Nachos_SemCreate(){
+int Nachos_SemCreate(){
 
    int pos = bitmapSemaforos->Find();             // Busca una posicion libre en el Bitmap 
 
@@ -311,15 +327,15 @@ void Nachos_SemCreate(){
 
 
 
-void Nachos_SemDestroy(){
+int Nachos_SemDestroy(){
 
     int devolver;
     int id = machine->ReadRegister(4);                   // Id del semaforo a destruir
 
-    if((id > MaxSemaforos)||(id < 0)||(miBitMapSemaforos->Test(id))){                     // Si el id es valido
+    if((id > 20)||(id < 0)||(bitmapSemaforos->Test(id))){                     // Si el id es valido
 
         delete semaforosActuales[id];                    // destruye el semaforo
-        miBitMapSemaforos->Clear(id);                    // y libera espacio en el BitMap
+        bitmapSemaforos->Clear(id);                    // y libera espacio en el BitMap
 
         printf("Se destruyo el semaforo con id %d\n", id);
         devolver = 0;
@@ -335,12 +351,12 @@ void Nachos_SemDestroy(){
 
 }
 
-void Nachos_SemSignal(){
+int Nachos_SemSignal(){
 
     int devolver;
     int id = machine->ReadRegister(4);                // Id del semaforo
 
-    if((id > MaxSemaforos)||(id < 0)||(miBitMapSemaforos->Test(id))){        // Si el id es valido
+    if((id > 20)||(id < 0)||(bitmapSemaforos->Test(id))){        // Si el id es valido
 
         semaforosActuales[id]->V();                   // envia un signal al semaforo
 
@@ -360,12 +376,12 @@ void Nachos_SemSignal(){
 }
 
 
-void Nachos_SemWait(){
+int Nachos_SemWait(){
 
     int devolver;
     int id = machine->ReadRegister(4);                // Id del semaforo
 
-    if((id > MaxSemaforos)||(id < 0)||(miBitMapSemaforos->Test(id))){                  // Si el id es valido
+    if((id > 20)||(id < 0)||(bitmapSemaforos->Test(id))){                  // Si el id es valido
 
         semaforosActuales[id]->P();                   // envia un wait al semaforo
 
@@ -456,7 +472,7 @@ void ExceptionHandler(ExceptionType which){
 		break;
 
 	    case SC_SemSignal:
-		Nachos_Signal();
+		Nachos_SemSignal();
 		returnFromSystemCall();
 		break;
 	    case SC_SemWait:

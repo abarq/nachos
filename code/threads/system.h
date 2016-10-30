@@ -31,7 +31,7 @@ extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
 extern BitMap * pageTableMap;
 extern BitMap * bitmapSemaforos;
-extern Semaphore* semaforosActuales[]
+extern Semaphore* semaforosActuales[20];
 
 #ifdef USER_PROGRAM
 #include "machine.h"

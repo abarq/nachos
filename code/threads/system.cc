@@ -22,7 +22,7 @@ Timer *timer;				// the hardware timer device,
 BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
 Semaphore* semaforosActuales[20];
-Thread *hilosActuales[MaxHilos]; 
+Thread *hilosActuales[10]; 
 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
