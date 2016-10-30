@@ -289,9 +289,52 @@ void Nachos_Exec(){
 
    	}
 
+ 	delete executable;   
+
+    	int id = pageTableMap->Find();
+
+    	if(id != -1){                   // Si el archivo existe
+        
+       		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
+       		strcpy(nombreEx, nombreExe);                      // Guardo el nombre a una variable global
+       		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
+       		hilosActuales[id]->id = id;                       // Le asigno el id
+       		hilosActuales[id]->Fork(ExeAux, 1);               // Pongo a correr el hilo
+       		printf("Se puso a correr el archivo\n");
+
+    	}else{
+
+       		 printf("No hay espacio para abrir el archivo %s\n", nombreEx);
+        	delete executable;
+   	 }
+
+   	 machine->WriteRegister(2, id);
+   	 return id;
 
 
 }
+
+void ExeAux (int nada){
+
+    printf("Se esta ejecutando el archivo %s\n", nombreEx);
+
+    OpenFile *executable = fileSystem->Open(nombreEx);       // Abro el ejecutable
+    AddrSpace *space = new AddrSpace(executable);
+    currentThread->space = space;                            // Le asigno el address space
+
+    delete executable;
+
+    semExec->V();                       // Permito cambios a la variable nombreEx
+
+    space->InitRegisters();		// Le da el valor inicial a los registros
+    space->RestoreState();		// Indica donde esta su page table
+    machine->Run();			// Corre el programa de usuario
+    
+
+}
+
+
+
 
 void Nachos_Yield(){
 
