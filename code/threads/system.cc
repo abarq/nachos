@@ -21,6 +21,7 @@ Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
+BitMap * hilosMap;
 Semaphore* semaforosActuales[20];
 Thread *hilosActuales[MaxHilos]; 
 
@@ -101,6 +102,7 @@ Initialize(int argc, char **argv)
     bool debugUserProg = false;	// single step user program
 	pageTableMap=new BitMap(32);
     bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
+    hilosMap	= new BitMap(20);
 #endif
 #ifdef FILESYS_NEEDED
     bool format = false;	// format disk

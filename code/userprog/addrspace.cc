@@ -19,7 +19,6 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
-#include <stdio.h>
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -60,8 +59,10 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace(OpenFile *executable)
 {
+	DEBUG('a', "Entrando al addres space" );
+
     NoffHeader noffH;
-    unsigned int i, size;
+    unsigned int size;
 
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
@@ -69,14 +70,22 @@ AddrSpace::AddrSpace(OpenFile *executable)
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
-// how big is address space?
-    size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
-			+ UserStackSize;	// we need to increase the size
-						// to leave room for the stack
+	int stackSize= UserStackSize;
+	
+	//se calculan por separado cuantas páginas se ocupan por cada segmento.
+	codePages=divRoundUp(noffH.code.size,PageSize);
+	dataPages=divRoundUp(noffH.initData.size,PageSize);
+	unDataPages=divRoundUp(noffH.uninitData.size,PageSize);
+	stackPages=divRoundUp(stackSize,PageSize);
+	
+    numPages = codePages+dataPages+unDataPages+stackPages;
+   	printf("tamaño de segmento de codigo: %d\n",noffH.code.size);
+	printf("tamaño de segmento de datos incializados: %d\n",noffH.initData.size);
+	printf("tamaño de segmento de datos no inicializados: %d\n",noffH.uninitData.size);
+	printf("tamaño de segmento de pila: %d\n",stackSize);
 
-
-    numPages = divRoundUp(size, PageSize);
     size = numPages * PageSize;
+    printf("Cantidad de páginas %d\n",numPages);
 
     ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
@@ -85,12 +94,20 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
+// first, set up the translation if it is no initializate yet
+	pageTable = new TranslationEntry[numPages];
+	
+	printf("buscando las posiciones vacías del bitmap\n");
 
-// first, set up the translation 
-    pageTable = new TranslationEntry[numPages];
-    for (i = 0; i < numPages; i++) {
+	for (int i=0; i<numPages;i++)
+	{
+		positions[i]= pageTableMap->Find();
+		printf("se ha guardado la página %d en la posicion %d del mapa\n",i,positions[i]);
+	}
+	//se guardan las páginas en memoria basandose en el arreglo de posiciones libres encontradas anteriormente
+    for (int i = 0; i < numPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-	pageTable[i].physicalPage = i;
+	pageTable[i].physicalPage = positions[i];
 	pageTable[i].valid = true;
 	pageTable[i].use = false;
 	pageTable[i].dirty = false;
@@ -98,25 +115,89 @@ AddrSpace::AddrSpace(OpenFile *executable)
 					// a separate page, we could set its 
 					// pages to be read-only
     }
-
-// zero out the entire address space, to zero the unitialized data segment 
-// and the stack segment
-    bzero(machine->mainMemory, size);
+    printf("Se han guardado las páginas\n");
 
 // then, copy in the code and data segments into memory
-    if (noffH.code.size > 0) {
-        DEBUG('a', "Initializing code segment, at 0x%x, size %d\n", 
-			noffH.code.virtualAddr, noffH.code.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.code.virtualAddr]),
-			noffH.code.size, noffH.code.inFileAddr);
-    }
-    if (noffH.initData.size > 0) {
-        DEBUG('a', "Initializing data segment, at 0x%x, size %d\n", 
-			noffH.initData.virtualAddr, noffH.initData.size);
-        executable->ReadAt(&(machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
-    }
+//primero se guarda el tamaño del segmento de código
+	int codeSize =  noffH.code.size;
+	int usedPages=0;
+	int bytesToCopy=PageSize;
+	while ( codeSize>0)
+	{
+		if (codeSize<PageSize)
+			bytesToCopy=codeSize;
+		//se guarda página por página en la memoria de la máquina en las posiciones obtenidas
+		
+		executable->ReadAt(&(machine->mainMemory[positions[usedPages]*PageSize]),
+		bytesToCopy, noffH.code.inFileAddr+usedPages*PageSize);
+		printf("Se han copiado %d bytes a la página %d de la memoria\n",bytesToCopy,positions[usedPages]);
+		//luego se resta los bytes copiados del total y se suman las paginas utilizadas
+		codeSize-=PageSize;
+		usedPages++;
+	}
+	
+	printf("se han copiado el segmento de código\n");
+	
+	int dataSize =  noffH.initData.size;
+	bytesToCopy=PageSize;
+	
+	while ( dataSize>0)
+	{
+		if (dataSize<PageSize)
+			bytesToCopy=PageSize;
+		//se guarda página por página en la memoria de la máquina en las posiciones obtenidas
+		executable->ReadAt(&(machine->mainMemory[positions[usedPages]*PageSize]),
+		bytesToCopy, noffH.initData.inFileAddr+usedPages*PageSize);
+		printf("Se han copiado %d bytes a la página %d de la memoria\n",bytesToCopy,positions[usedPages]);
+		//luego se resta los bytes copiados del total y se suman las paginas utilizadas
+		dataSize-=PageSize;
+		usedPages++;
+	}
+	printf("se han copiado el segmento de datos\n");
 
+}
+
+/**
+*Constructor para hacer copia de un AddrSpace que recibe un addrspace
+*
+*/
+
+AddrSpace::AddrSpace(AddrSpace *addr)
+{
+	//primeramente se copian los numeros de páginas de los segmentos utilizados 
+	//por el código y los datos inicializados
+    numPages = addr->numPages;
+    codePages= addr->codePages;
+    dataPages = addr->codePages;
+    
+    
+    pageTable = new TranslationEntry[numPages];
+	
+	//primeramente se copian los apuntadores de la memoria de códigos y datos inicializados
+    for (int i = 0; i < codePages+dataPages; i++)
+    {
+            pageTable[i].virtualPage = addr->pageTable[i].virtualPage;
+            pageTable[i].physicalPage = addr->pageTable[i].physicalPage;
+            pageTable[i].valid = true;
+            pageTable[i].use = false;
+            pageTable[i].dirty = false;
+            pageTable[i].readOnly = false;
+
+	}
+	
+	//se reserva el espacio para las variables no inicializadas y la pila
+	//dado que cada proceso tiene su propia pila se reserva nuevamente
+	for (int i=codePages+dataPages;i<numPages;i++)
+	{    
+		
+		pageTable[i].virtualPage = i;
+		pageTable[i].physicalPage = pageTableMap->Find();
+		pageTable[i].valid = true;
+		pageTable[i].use = false;
+		pageTable[i].dirty = false;
+		pageTable[i].readOnly = false;
+	}
+    
 }
 
 //----------------------------------------------------------------------
@@ -142,9 +223,7 @@ AddrSpace::~AddrSpace()
 void
 AddrSpace::InitRegisters()
 {
-    int i;
-
-    for (i = 0; i < NumTotalRegs; i++)
+    for (int i = 0; i < NumTotalRegs; i++)
 	machine->WriteRegister(i, 0);
 
     // Initial program counter -- must be location of "Start"
