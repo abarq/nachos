@@ -408,8 +408,7 @@ void NachosForkThread(int reg){
 
 	DEBUG( 'u', "Entering Fork System call\n" );
 	// We need to create a new kernel thread to execute the user thread
-	
-	
+		
 	 printf("Se llamo a Fork\n");
     int id = hilosMap->Find();                                // Encuentra un espacion libre para el proceso
 
