@@ -21,6 +21,7 @@ Timer *timer;				// the hardware timer device,
 					// for invoking context switches
 BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
+BitMap * hilosMap;
 Semaphore* semaforosActuales[20];
 Thread *hilosActuales[10]; 
 
