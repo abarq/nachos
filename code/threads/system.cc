@@ -102,6 +102,8 @@ Initialize(int argc, char **argv)
     bool debugUserProg = false;	// single step user program
 	pageTableMap=new BitMap(32);
     bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
+	hilosMap	= new BitMap(20);
+
 #endif
 #ifdef FILESYS_NEEDED
     bool format = false;	// format disk

@@ -16,6 +16,7 @@
 #include "stats.h"
 #include "timer.h"
 #include "synch.h"
+#define MaxHilos 20
 
 // Initialization and cleanup routines
 extern void Initialize(int argc, char **argv); 	// Initialization,
@@ -29,9 +30,13 @@ extern Scheduler *scheduler;			// the ready list
 extern Interrupt *interrupt;			// interrupt status
 extern Statistics *stats;			// performance metrics
 extern Timer *timer;				// the hardware alarm clock
+//variables nuevas
 extern BitMap * pageTableMap;
 extern BitMap * bitmapSemaforos;
 extern Semaphore* semaforosActuales[20];
+extern BitMap * hilosMap;
+extern Thread *hilosActuales[MaxHilos]; 
+
 
 #ifdef USER_PROGRAM
 #include "machine.h"
