@@ -39,6 +39,7 @@ Thread::Thread(const char* threadName)
     stack = NULL;
     status = JUST_CREATED;
     openFilesTable = new NachosOpenFilesTable(); 
+    waiting = new BitMap(20);
 #ifdef USER_PROGRAM
     space = NULL;
 #endif

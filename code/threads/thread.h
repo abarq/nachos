@@ -44,6 +44,7 @@
 #include "machine.h"
 #include "addrspace.h"
 #include "NachosOpenFilesTable.h"
+#include "bitmap.h"
 #endif
 
 // CPU register state to be saved on context switch.  
@@ -101,6 +102,8 @@ class Thread {
     void Print() { printf("%s, ", name); }
 	
     int id;
+	BitMap * waitingProcess;
+
 
   private:
     // some of the private data for this class is listed above
