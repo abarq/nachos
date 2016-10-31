@@ -330,9 +330,6 @@ void Nachos_Exec(){
    	 }
 
    	 machine->WriteRegister(2, id);
-
-
-
 }
 
 
@@ -368,7 +365,7 @@ void NachosForkThread(void* reg){
  * un addres space como parámetro
  * +
  */
- void Nachos_Fork() {			// System call 9
+ /*void Nachos_Fork() {			// System call 9
 
 	DEBUG( 'u', "Entering Fork System call\n" );
 	// We need to create a new kernel thread to execute the user thread
@@ -390,7 +387,7 @@ void NachosForkThread(void* reg){
 	returnFromSystemCall();	// This adjust the PrevPC, PC, and NextPC registers
 
 	DEBUG( 'u', "Exiting Fork System call\n" );
-}	// Kernel_Fork
+}	// Kernel_Fork*/
 
 
 
@@ -438,6 +435,7 @@ int Nachos_SemDestroy(){
     
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
+	return devolver;
 
 }
 
@@ -461,7 +459,7 @@ int Nachos_SemSignal(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-
+	return devolver;
 
 }
 
@@ -486,7 +484,7 @@ int Nachos_SemWait(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-
+	return devolver;
 
 }
 
@@ -537,7 +535,7 @@ void ExceptionHandler(ExceptionType which){
 		returnFromSystemCall();
 		break;
 	    case SC_Fork:
-		Nachos_Fork();
+		//Nachos_Fork();
 		returnFromSystemCall();
 		break;
 	    case SC_Join:
