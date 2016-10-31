@@ -41,6 +41,10 @@ Thread::Thread(const char* threadName)
     openFilesTable = new NachosOpenFilesTable(); 
     waitingProcess = new BitMap(20);
     sem = new Semaphore("semaforo",0);
+    numArchivosUsados = 0;
+    for(int i = 0; i < 100; i++){
+    	archivosUsados[i] = -1;
+    }
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
@@ -103,7 +107,6 @@ Thread::Fork(VoidFunctionPtr func, void* arg)
 #endif
 
     StackAllocate(func, arg);
-
     IntStatus oldLevel = interrupt->SetLevel(IntOff);
     scheduler->ReadyToRun(this);	// ReadyToRun assumes that interrupts 
 					// are disabled!

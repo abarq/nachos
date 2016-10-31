@@ -37,6 +37,8 @@
 #ifndef THREAD_H
 #define THREAD_H
 
+#define MaxArchivos 100
+
 #include "copyright.h"
 #include "utility.h"
 
@@ -102,9 +104,10 @@ class Thread {
     void Print() { printf("%s, ", name); }
 	
     int id;
-	BitMap * waitingProcess;
-	Semaphore * sem;
-
+    BitMap * waitingProcess;
+    Semaphore * sem;
+    int archivosUsados[MaxArchivos];
+    int numArchivosUsados;
 
   private:
     // some of the private data for this class is listed above

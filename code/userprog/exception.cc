@@ -93,16 +93,13 @@ char* leerEntrada(){
 //Metodo Open de nachos, redireccionado del systemCall Open de NachOS.
 void Nachos_Open(){
 
+	printf("Se ingreso al SC Open\n");
 	char* buffer=NULL; //Crea un buffer en el cual se almacenara el nombre del archivo que se abrira.
 
 	buffer = leerEntrada();
-	printf("El buffer es: %s\n", buffer);
-	printf("\n");
+	
 	int descriptor = open(buffer,O_RDWR);   //Llamado de open de Unix, devuelve un descriptor de la tabla de archivos abiertos.
 
-	char* string = new char[20];
-	int byteLeidos = read(descriptor,string,5);
-	printf("ByLei en Open : %d\n", byteLeidos);
 	int respuestaOpen = currentThread->openFilesTable->Open(descriptor); //Devuelve si el metodo opn fue exitoso.
 	currentThread->openFilesTable->Print();
 	printf("%d\n", respuestaOpen);
@@ -110,20 +107,20 @@ void Nachos_Open(){
 	if(respuestaOpen == -1){  //En caso de que devuelve
 
 		printf("Ocurrió un error a la hora de abrir el archivo\n");
-		exit(0); // Llama el system call exit() de nachOS para 
+		Exit(0); // Llama el system call Exit() de nachOS para 
 
 	}
-	printf("Antes de stats\n");
+
 	stats->numDiskReads++; //Actualiza las estadisticas de las lecturas en el disco.
-	printf("Antes de returnFromSystemCall\n");
+
 	machine->WriteRegister(2,respuestaOpen);
-	printf("FINAL FINAL\n");
-	
+
 }
 
 
 void Nachos_Write(){
 
+	printf("Se ingreso al SC Write\n");
         char * buffer = NULL;
         int size = machine->ReadRegister( 5 );	// Lee el tamaño a escribirRead size to write
 
@@ -179,6 +176,7 @@ void Nachos_Write(){
 void Nachos_Read(){
 
 
+	printf("Se ingreso al SC Read\n");	
 	int bytesLeidos;
 
 	OpenFileId id = machine->ReadRegister( 6 );
@@ -220,6 +218,8 @@ void Nachos_Read(){
 void Nachos_Close(){
 
 
+
+	printf("Se ingreso al SC Close\n");
 	int id = machine->ReadRegister(4);
 
 
@@ -247,11 +247,44 @@ void Nachos_Close(){
 
 }
 
-
-
 void Nachos_Exit(){
 
-	int exitStatus = machine->ReadRegister(4);
+	printf("Se ingreso al SC Exit del hilo: %d\n", currentThread->id);
+	int estado = machine->ReadRegister(4);                  // Lee el estado con que debe terminar
+
+	states[currentThread->id] = estado;                    // Lee el estado con que debe terminar el hilo
+  
+	int i = 0;     
+	while(currentThread->waitingProcess->NumClear() < MaxHilos){ // Si aun tiene procesos esperando
+		
+		if(currentThread->waitingProcess->Test(i) && pageTableMap->Test(i)) { // Si el archivo con id i lo esta esperando
+          	printf("Se mando un signal al proceso con id %d\n", i);                
+         	currentThread->openFilesTable->openFilesMap->Clear(i);                                 // Indica que al proceso i que puede seguir
+	 	hilosActuales[i]->sem->V();    
+                                   // Le manda un signal al proceso i
+      		}
+        i++; 
+	}
+
+	bool pertenece = false;
+	int pos = 0;
+
+	while(pos < 100){                                // Si mientras no haya revisado todos los archivos
+
+		
+		if(currentThread->openFilesTable->openFilesMap->Test(pos) && (currentThread->archivosUsados[pos] != -1)){
+
+       	   	currentThread->openFilesTable->openFilesMap->Clear(pos);                     // Limpio la posicion en el Bitmap
+	  	Close(currentThread->archivosUsados[pos]);                                   // Cierro el archivo
+           	currentThread->archivosUsados[pos] = -1;                                     // Indico que la posicion esta libre
+       		}	
+       pos++;
+       }
+
+    printf("El hilo %d termino con estado %d\n", currentThread->id, estado);
+
+    pageTableMap->Clear(currentThread->id);    // El proceso actual va a terminar
+    currentThread->Finish();                       // Termina el proceso
 
 }
 
@@ -263,6 +296,7 @@ void Nachos_Halt(){
 
 void Nachos_Create(){
 
+	printf("Se ingreso al SC Create\n");
 	char* buffer = leerEntrada();
 	fileSystem->Create(buffer,0);
 	delete[]buffer;
@@ -273,87 +307,82 @@ void Nachos_Create(){
 
 void Nachos_Join(){
 
- int id = machine->ReadRegister(4);                   // se lee id ID del proceso que hay que esperar a que termine
+	printf("Se ingreso al SC Join\n");
+	int id = machine->ReadRegister(4);                   // se lee id ID del proceso que hay que esperar a que termine
 
-    if((id > MaxHilos)||(id < 0)||(!hilosMap->Test(id))) {                 //retorna error si no se tiene id válido
-       printf("id del proceso invalido\n");
-       machine->WriteRegister(2, id);                                               
+	if((id > MaxHilos)||(id < 0)||(!hilosMap->Test(id))) {                 //retorna error si no se tiene id válido
+
+      		 printf("id del proceso invalido\n");
+      		 machine->WriteRegister(2, id);                                               
        
     }
 
-    hilosActuales[id]->waitingProcess->Mark(currentThread->id);     // Le indico al proceso hijo que debe indicarme cuando termine para poder seguir
-    printf("Mando un wait al proceso con id %d\n", currentThread->id);
-    currentThread->sem->P();                                         // wait for the child
-    machine->WriteRegister(2, states[id]);
-
+	hilosActuales[id]->waitingProcess->Mark(currentThread->id);// Le indico al proceso hijo que debe indicarme cuando termine para poder seguir
+	printf("Mando un wait al proceso con id %d\n", currentThread->id);
+	currentThread->sem->P();                                         // wait for the child
+	machine->WriteRegister(2, states[id]);
     
 }
 
 void ExeAux (void* nada){
 
-    printf("Se esta ejecutando el archivo %s\n", nombreEx);
+	printf("Se esta ejecutando el archivo %s\n", nombreEx);
 
-    OpenFile *executable = fileSystem->Open(nombreEx);       // Abro el ejecutable
-    AddrSpace *space = new AddrSpace(executable);
-    currentThread->space = space;                            // Le asigno el address space
+	OpenFile *executable = fileSystem->Open(nombreEx);       // Abro el ejecutable
+	AddrSpace *space = new AddrSpace(executable);
+	currentThread->space = space;                            // Le asigno el address space
 
-    delete executable;
+	delete executable;
 
-    semExec->V();                       // Permito cambios a la variable nombreEx
+	semExec->V();                       // Permito cambios a la variable nombreEx
 
-    space->InitRegisters();		// Le da el valor inicial a los registros
-    space->RestoreState();		// Indica donde esta su page table
-    machine->Run();			// Corre el programa de usuario
-    
+	space->InitRegisters();		// Le da el valor inicial a los registros
+	space->RestoreState();		// Indica donde esta su page table
+	machine->Run();			// Corre el programa de usuario
 
 }
 
 
 void Nachos_Exec(){
 
+	printf("Se ingreso al SC Exec");
 	char* nombreEjecutable = leerEntrada();
 	OpenFile *executable = fileSystem->Open(nombreEjecutable); 	
 
   	if (executable == NULL) { 
                                     // Si el archivo no existe 
 		printf("No se puede abrir el archivo %s\n", nombreEjecutable);
-      	  machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
+	      	machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
+		delete executable;   
 
+   	}else{ // Si el archivo existe
 
-   	}
+	    	int id = pageTableMap->Find();  //Si hay campo para ejecutar el archivo
 
- 	delete executable;   
+	    	if(id != -1){                   
+		
+	       		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
+	       		strcpy(nombreEx, nombreEjecutable);                      // Guardo el nombre a una variable global
+	       		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
+	       		hilosActuales[id]->id = id;                       // Le asigno el id
+	       		hilosActuales[id]->Fork(ExeAux, (void*)1);               // Pongo a correr el hilo
+	       		printf("Se puso a correr el archivo\n");
 
-    	int id = pageTableMap->Find();
+	    	}else{
 
-    	if(id != -1){                   // Si el archivo existe
-        
-       		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
-       		strcpy(nombreEx, nombreEjecutable);                      // Guardo el nombre a una variable global
-       		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
-       		hilosActuales[id]->id = id;                       // Le asigno el id
-       		hilosActuales[id]->Fork(ExeAux, (void*)1);               // Pongo a correr el hilo
-       		printf("Se puso a correr el archivo\n");
-
-    	}else{
-
-       		 printf("No hay espacio para abrir el archivo %s\n", nombreEx);
-        	delete executable;
-   	 }
+	       		printf("No hay espacio para abrir el archivo %s\n", nombreEx);
+			delete executable;
+	   	 }
 
    	 machine->WriteRegister(2, id);
 
-
+	}
 
 }
 
-
-
-
-
-
 void Nachos_Yield(){
-
+	
+	printf("Se ingreos al SC Yield");
 	currentThread->Yield();
 
 }
@@ -363,15 +392,19 @@ void Nachos_Yield(){
  * Método auxiliar para la creación de un nuevo hilo, llamado por el Nachos_Fork()
  */
 void NachosForkThread(void* reg){
+	
+		
+	long reg2 = (long) reg;
+	printf("Nuevo Hilo ejecutandose\n");
+	machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+	machine->WriteRegister(RetAddrReg,4);                            //Se asigna la direccion de retorno
+	machine->WriteRegister(PCReg, reg2);                              //Se mete al PC la direccion de la funcion a ejecutar
+	machine->WriteRegister(NextPCReg, reg2+4);
 
-    int reg2= *(int*) reg;
-    printf("Nuevo Hilo ejecutandose\n");
-    machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
-    machine->WriteRegister(PCReg, reg2);                              //Se mete al PC la direccion de la funcion a ejecutar
-    machine->WriteRegister(NextPCReg, reg2+4);
-    machine->WriteRegister(RetAddrReg,4);                            //Se asigna la direccion de retorno
+        printf("MachineRun\n");
 
-    machine->Run();                                                  //Corre el hilo que esta listo
+	machine->Run();                                                  //Corre el hilo que esta listo
+
 }
 
 /**
@@ -380,33 +413,29 @@ void NachosForkThread(void* reg){
  * un addres space como parámetro
  * +
  */
- void Nachos_Fork() {			// System call 9
+ void Nachos_Fork() {			
 
-	DEBUG( 'u', "Entering Fork System call\n" );
-	// We need to create a new kernel thread to execute the user thread
-		
-	 printf("Se llamo a Fork\n");
-    int id = hilosMap->Find();                                // Encuentra un espacion libre para el proceso
+    printf("Se llamo a Fork\n");
+    int id = pageTableMap->Find();                                // Encuentra un espacion libre para el proceso
 
     if(id != -1){                                                     // Si el id es valido
+
 		int registro = machine->ReadRegister(4);
 		Thread * newT = new Thread( "Nuevo Hilo " ); //se crea un nuevo hilo y
 		newT->space = new AddrSpace( currentThread->space );   //se copia la memoria del padre al hijo
 		newT->id=id;
 		newT->Fork(NachosForkThread,(void*)registro);		//se realiza el Fork con el método auxiliar
-		hilosActuales[id];					//finalmente se agrega el hilo al vector de hilos actuales
+		hilosActuales[id] = newT;					//finalmente se agrega el hilo al vector de hilos actuales
 		printf("Se ha creado el nuevo hilo\n");
-		        
+		hilosActuales[id]->sem->P();
+
     }
 
-	returnFromSystemCall();	// This adjust the PrevPC, PC, and NextPC registers
-
-	DEBUG( 'u', "Exiting Fork System call\n" );
 }	// Kernel_Fork
 
 
 
-int Nachos_SemCreate(){
+void Nachos_SemCreate(){
 
 	int pos = bitmapSemaforos->Find();             // Busca una posicion libre en el Bitmap 
 
@@ -424,12 +453,11 @@ int Nachos_SemCreate(){
     machine->WriteRegister(2, pos);                  // Guarda en el registro 2 el id
 
 
-   return pos;
 }
 
 
 
-int Nachos_SemDestroy(){
+void Nachos_SemDestroy(){
 
     int devolver;
     int id = machine->ReadRegister(4);                   // Id del semaforo a destruir
@@ -450,15 +478,16 @@ int Nachos_SemDestroy(){
     
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-	return devolver;
+
 
 }
 
-int Nachos_SemSignal(){
+void Nachos_SemSignal(){
 
     int devolver;
     int id = machine->ReadRegister(4);                // Id del semaforo
 
+    printf("Se ingresa a SemSignal\n");
     if((id > 20)||(id < 0)||(bitmapSemaforos->Test(id))){        // Si el id es valido
 
         semaforosActuales[id]->V();                   // envia un signal al semaforo
@@ -474,15 +503,16 @@ int Nachos_SemSignal(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-	return devolver;
+
 
 }
 
 
-int Nachos_SemWait(){
+void Nachos_SemWait(){
 
     int devolver;
     int id = machine->ReadRegister(4);                // Id del semaforo
+    printf("Se ingresa a SemWait\n");
 
     if((id > 20)||(id < 0)||(bitmapSemaforos->Test(id))){                  // Si el id es valido
 
@@ -499,7 +529,6 @@ int Nachos_SemWait(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-	return devolver;
 	
 }
 
