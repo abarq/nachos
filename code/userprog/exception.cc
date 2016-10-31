@@ -450,6 +450,7 @@ int Nachos_SemDestroy(){
     
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
+	return devolver;
 
 }
 
@@ -473,7 +474,7 @@ int Nachos_SemSignal(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-
+	return devolver;
 
 }
 
@@ -498,8 +499,8 @@ int Nachos_SemWait(){
 
     machine->WriteRegister(2, devolver);              // Guarda en el registro 2 el resultado
 
-
-
+	return devolver;
+	
 }
 
 /**Metodo que maneja las excepciones en el sistema NachOS
