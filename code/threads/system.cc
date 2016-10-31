@@ -23,7 +23,7 @@ BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
 BitMap * hilosMap;
 Semaphore* semaforosActuales[20];
-Thread *hilosActuales[10]; 
+Thread *hilosActuales[MAX]; 
 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
