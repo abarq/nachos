@@ -26,7 +26,7 @@ Semaphore* semaforosActuales[20];
 Thread *hilosActuales[MaxHilos]; 
 Semaphore* semExec;                          // Semaforo tipo mutex para proteger la variable nombreEx
 char nombreEx[100];                          // Variable para colocar el nombre del archivo que Exec va a ejecutar
-
+int *states; 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
 const long long DEFAULT_TIME_SLICE = 50000;
@@ -107,6 +107,8 @@ Initialize(int argc, char **argv)
   	bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
 	hilosMap	= new BitMap(20);
 	semExec = new Semaphore("semExec", 1);
+	states = new int[MaxHilos];
+
 
 #endif
 #ifdef FILESYS_NEEDED

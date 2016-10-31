@@ -46,7 +46,7 @@
 #include "NachosOpenFilesTable.h"
 #include "bitmap.h"
 #endif
-
+class Semaphore;  //foward declaration de la clase semaforo
 // CPU register state to be saved on context switch.  
 // x86 processors needs 9 32-bit registers, whereas x64 has 8 extra registers
 // We allocate room for the maximum of these two architectures
@@ -103,6 +103,7 @@ class Thread {
 	
     int id;
 	BitMap * waitingProcess;
+	Semaphore * sem;
 
 
   private:

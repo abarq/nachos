@@ -39,7 +39,8 @@ Thread::Thread(const char* threadName)
     stack = NULL;
     status = JUST_CREATED;
     openFilesTable = new NachosOpenFilesTable(); 
-    waiting = new BitMap(20);
+    waitingProcess = new BitMap(20);
+    sem = new Semaphore("semaforo",0);
 #ifdef USER_PROGRAM
     space = NULL;
 #endif
