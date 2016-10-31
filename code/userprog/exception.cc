@@ -342,11 +342,52 @@ void Nachos_Yield(){
 
 }
 
-void Nachos_Fork(){
 
+/**
+ * Método auxiliar para la creación de un nuevo hilo, llamado por el Nachos_Fork()
+ */
+void NachosForkThread(int reg){
 
-	returnFromSystemCall();
+    printf("Nuevo Hilo ejecutandose\n");
+    machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
+    machine->WriteRegister(PCReg, reg);                              //Se mete al PC la direccion de la funcion a ejecutar
+    machine->WriteRegister(NextPCReg, reg+4);
+    machine->WriteRegister(RetAddrReg,4);                            //Se asigna la direccion de retorno
+
+    machine->Run();                                                  //Corre el hilo que esta listo
 }
+
+/**
+ * Método para crear un fork a partir de un proceso activo. dado la dirección del proceso a realizar el fork
+ * copia los el contenido de los segmentos de datos y códgio a través del constructor de la clase Addres space que recibe
+ * un addres space como parámetro
+ * +
+ */
+ void Nachos_Fork() {			// System call 9
+
+	DEBUG( 'u', "Entering Fork System call\n" );
+	// We need to create a new kernel thread to execute the user thread
+		
+	 printf("Se llamo a Fork\n");
+    int id = hilosMap->Find();                                // Encuentra un espacion libre para el proceso
+
+    if(id != -1){                                                     // Si el id es valido
+		int registro = machine->ReadRegister(4);
+		Thread * newT = new Thread( "Nuevo Hilo " ); //se crea un nuevo hilo y
+		newT->space = new AddrSpace( currentThread->space );   //se copia la memoria del padre al hijo
+		newT->id=id;
+		newT->Fork(NachosForkThread,(void*)registro);		//se realiza el Fork con el método auxiliar
+		hilosActuales[id];					//finalmente se agrega el hilo al vector de hilos actuales
+		printf("Se ha creado el nuevo hilo\n");
+		        
+    }
+
+	returnFromSystemCall();	// This adjust the PrevPC, PC, and NextPC registers
+
+	DEBUG( 'u', "Exiting Fork System call\n" );
+}	// Kernel_Fork
+
+
 
 int Nachos_SemCreate(){
 
