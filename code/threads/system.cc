@@ -23,7 +23,7 @@ BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
 BitMap * hilosMap;
 Semaphore* semaforosActuales[20];
-Thread *hilosActuales[MAX]; 
+Thread *hilosActuales[MaxHilos]; 
 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
@@ -102,6 +102,7 @@ Initialize(int argc, char **argv)
     bool debugUserProg = false;	// single step user program
 	pageTableMap=new BitMap(32);
     bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
+    hilosMap	= new BitMap(20);
 #endif
 #ifdef FILESYS_NEEDED
     bool format = false;	// format disk
@@ -236,4 +237,3 @@ Cleanup()
     
     Exit(0);
 }
-

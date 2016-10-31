@@ -96,16 +96,13 @@ void Nachos_Open(){
 	char* buffer=NULL; //Crea un buffer en el cual se almacenara el nombre del archivo que se abrira.
 
 	buffer = leerEntrada();
-	printf("El buffer es: %s\n", buffer);
 	printf("\n");
 	int descriptor = open(buffer,O_RDWR);   //Llamado de open de Unix, devuelve un descriptor de la tabla de archivos abiertos.
 
 	char* string = new char[20];
 	int byteLeidos = read(descriptor,string,5);
-	printf("ByLei en Open : %d\n", byteLeidos);
 	int respuestaOpen = currentThread->openFilesTable->Open(descriptor); //Devuelve si el metodo opn fue exitoso.
 	currentThread->openFilesTable->Print();
-	printf("%d\n", respuestaOpen);
 
 	if(respuestaOpen == -1){  //En caso de que devuelve
 
@@ -113,11 +110,9 @@ void Nachos_Open(){
 		exit(0); // Llama el system call exit() de nachOS para 
 
 	}
-	printf("Antes de stats\n");
 	stats->numDiskReads++; //Actualiza las estadisticas de las lecturas en el disco.
-	printf("Antes de returnFromSystemCall\n");
+
 	machine->WriteRegister(2,respuestaOpen);
-	printf("FINAL FINAL\n");
 	
 }
 
@@ -200,10 +195,11 @@ void Nachos_Read(){
 	
 		printf("La cantidad de bytes leidos son: %d\n",bytesLeidos);
 
-		//for(int i = 0; i < size; i++){ 
+		
+		for(int i = 0; i < size; i++){ 
 
-         	//	machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
-      		//}
+         		machine->WriteMem((int)buffer, 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
+      		}
 		
 		delete[] temp;
 		
@@ -219,31 +215,31 @@ void Nachos_Read(){
 
 void Nachos_Close(){
 
-	int nachosHandle;
 
-	if(machine->ReadMem(4,1,&nachosHandle)){
-
-		int unixHandle = currentThread->openFilesTable->getUnixHandle(nachosHandle);
-	
-		if(close(unixHandle)==0){
-
-			if(currentThread->openFilesTable->Close(nachosHandle)==1){
-
-				printf("El archivo se cerro correctamente");
-
-			}	
+	int id = machine->ReadRegister(4);
 
 
-		}else{
+	if(id<3 || !(currentThread->openFilesTable->openFilesMap->Test(id))){
 
-			printf("No se concreto el Close");
+
+		printf("El id no es valido, no se pudo ejecutar Close");
+
+
+	}else{
+
+
+		int nachosHandle = currentThread->openFilesTable->getUnixHandle(id);
+		close(nachosHandle);
+		if(currentThread->openFilesTable->Close(id) == 1){
+
+
+			printf("El archivo se cerro correctamente");
 
 		}
 
 
-
 	}
-
+	
 
 }
 
@@ -284,7 +280,7 @@ void Nachos_Exec(){
   	if (executable == NULL) { 
                                     // Si el archivo no existe 
 		printf("No se puede abrir el archivo %s\n", nombreExe);
-      	  machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
+      		machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
 		return -1;
 
    	}
@@ -296,7 +292,7 @@ void Nachos_Exec(){
     	if(id != -1){                   // Si el archivo existe
         
        		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
-       		strcpy(nombreEx, nombreExe);                      // Guardo el nombre a una variable global
+       		strcpy(nombreEx, nombreEjecutable);                      // Guardo el nombre a una variable global
        		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
        		hilosActuales[id]->id = id;                       // Le asigno el id
        		hilosActuales[id]->Fork(ExeAux, 1);               // Pongo a correr el hilo
@@ -309,7 +305,7 @@ void Nachos_Exec(){
    	 }
 
    	 machine->WriteRegister(2, id);
-   	 return id;
+
 
 
 }

@@ -21,6 +21,7 @@
 class AddrSpace {
   public:
     AddrSpace(OpenFile *executable);	// Create an address space,
+    AddrSpace(AddrSpace * addr);
 					// initializing it with the program
 					// stored in the file "executable"
     ~AddrSpace();			// De-allocate an address space
@@ -33,8 +34,15 @@ class AddrSpace {
 
   private:
     TranslationEntry *pageTable;	// Assume linear page table translation
+   	int  positions[32];
 
-    unsigned int numPages;		// Number of pages in the virtual 
+   
+    int numPages;		// Nuemro total de páginas (incluye pila)
+    int codePages;
+	int dataPages;
+	int unDataPages;
+	int stackPages;
+	
 					// address space
 };
 
