@@ -278,7 +278,7 @@ void Nachos_Join(){
     if((id > MaxHilos)||(id < 0)||(!hilosMap->Test(id))) {                 //retorna error si no se tiene id válido
        printf("id del proceso invalido\n");
        machine->WriteRegister(2, id);                                               
-       return -1;
+       
     }
 
     hilosActuales[id]->waitingProcess->Mark(currentThread->id);     // Le indico al proceso hijo que debe indicarme cuando termine para poder seguir
@@ -286,8 +286,7 @@ void Nachos_Join(){
     currentThread->sem->P();                                         // wait for the child
     machine->WriteRegister(2, states[id]);
 
-    return states[id];    
-	returnFromSystemCall();
+    
 }
 
 void ExeAux (void* nada){
