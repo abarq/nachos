@@ -36,7 +36,8 @@ extern BitMap * bitmapSemaforos;
 extern Semaphore* semaforosActuales[20];
 extern BitMap * hilosMap;
 extern Thread *hilosActuales[MaxHilos]; 
-
+extern Semaphore* semExec;                           // Semaforo tipo mutex para proteger la variable nombreEx
+extern char nombreEx[100];                           // Variable para colocar el nombre del archivo que Exec va a ejecutar
 
 #ifdef USER_PROGRAM
 #include "machine.h"
