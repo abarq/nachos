@@ -200,10 +200,10 @@ void Nachos_Read(){
 	
 		printf("La cantidad de bytes leidos son: %d\n",bytesLeidos);
 
-		//for(int i = 0; i < size; i++){ 
+		for(int i = 0; i < size; i++){ 
 
-         	//	machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
-      		//}
+         		machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
+      		}
 		
 		delete[] temp;
 		
