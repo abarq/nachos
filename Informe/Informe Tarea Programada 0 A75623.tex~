@@ -1,0 +1,217 @@
+
+% Universidad de Costa Rica
+% Plantilla para documentación
+% Elaborado por Isabel Chaves & Andreína Alvarado
+
+\documentclass[11pt]{article}
+\usepackage{vmargin}
+\setpapersize{A4}
+\setmargins{2.25cm}  % margen izquierdo
+{1.5cm}              % margen superior
+{16.5cm}             % anchura del texto
+{23.42cm}            % altura del texto
+{10pt}               % altura de los encabezados
+{1cm}                % espacio entre el texto y los encabezados
+{0pt}                % altura del pie de página
+{2cm}          
+\usepackage{blindtext}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern, textcomp}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{color}
+\usepackage{xcolor}
+\setpapersize{A4}
+\usepackage{graphicx}
+\usepackage{array}
+\definecolor{verdigris}{rgb}{0.26, 0.7, 0.68}
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\definecolor{aquamarine}{rgb}{0.5, 1.0, 0.83}
+\definecolor{unitednationsblue}{rgb}{0.36, 0.57, 0.9}
+\definecolor{pastelblue}{rgb}{0.68, 0.78, 0.81}
+\definecolor{turquoise}{rgb}{0.19, 0.84, 0.78}
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{turquoisegreen}{rgb}{0.63, 0.84, 0.71}
+\definecolor{uclablue}{rgb}{0.33, 0.41, 0.58}
+\definecolor{beaublue}{rgb}{0.74, 0.83, 0.9}
+\definecolor{bluegray}{rgb}{0.4, 0.6, 0.8}
+\definecolor{cyan(process)}{rgb}{0.0, 0.72, 0.92}
+\definecolor{bubbles}{rgb}{0.91, 1.0, 1.0}
+\usepackage{tabu}
+\usepackage{amsmath}
+\RequirePackage{fancyhdr}
+\RequirePackage{fancybox}
+\begin{document}
+\sffamily
+
+
+\begin{center}
+	\LARGE\textbf{Universidad de Costa Rica}\\
+	\textbf{Facultad de Ingeniería}\\
+	\textbf{Escuela de Ciencias de la Computación e Informática}\\ \ \\
+	\Large 	CI-1310 Sistemas Operativos\\
+	Grupo $02$\\
+	II Semestre
+\end{center}
+
+
+\begin{center}
+	\huge\textbf{Tarea programada \#0}
+\end{center}
+
+\begin{center}
+	\LARGE\textbf{Profesor:}\\
+	Francisco Arroyo\\ \ \\ \ \\
+	\LARGE\textbf{Estudiantes:}\\
+	Steven Rojas Lizano 1 $|$ A75623\\
+	
+	\textbf{ 03 de setiembre del 2016}
+\end{center}
+\thispagestyle{empty}
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------INDICE----------------------------------------------
+%--------------------------------------------------------------------------
+\tableofcontents
+
+\thispagestyle{empty}
+\newpage\setcounter{page}{1}
+
+%--------------------------------------------------------------------------
+%----------------------INTRODUCCION----------------------------------------
+%--------------------------------------------------------------------------
+\newpage
+\section[introducción]{Introducción}
+
+
+
+Se realizó un proyecto el cual es capaz de comparar la similitud entre 2 archivos, esto se logro con el uso de 2 clases  que implementan el uso de stream y set de strings. se generan 5 tipos de comparación y finalmente se realiza una ponderación entre los 5 tipos, dando así un total de \% de comparación entre ambos archivos.\\
+
+%\newpage
+
+%--------------------------------------------------------------------------
+%----------------------OBJETIVOS-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Objetivos]{Objetivos}
+
+\indent$\bullet$ Familiarizar al estudiante con los ambientes y herramientas de programación disponibles en el sistema operativo UNIX, al menos con algunos de sus sabores Linux.\\
+
+\indent$\bullet$ Construir programas en ambientes UNIX.\\
+
+\indent$\bullet$Conocer algunos de los llamados al sistema de ambientes Unix (System Calls).\\
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------DESCRIPCION-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Descripción]{Descripción}
+
+Acá se debe indicar la descripción del problema (enunciado).\\
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------DESARROLLO-------------------------------------------
+%--------------------------------------------------------------------------
+\section[Desarrollo]{Desarrollo}
+
+\subsection[Definición de Clases]{Definición de clases}
+La solucion del sistema se realizó mediante 2 clases que se indican a continuación.
+\subsubsection{Clase FileReader}
+Clase encargada de realizar la lectura y obtención de información de los archivos de texto. la definición de dicha clase se encuentra contenida en el archivo FileReader.h y FileReader.CPP.\\
+Posee los siguientes métodos para la obtención de datos:
+\begin{itemize}
+\item \emph{FileReader}: constructor de la clase, establece la bandera good, la variable path y las palabras reservadas.
+  \item  \emph{initialize}: Inicializa la clase Filereader y determina el tamaño del archivo.
+  \item \emph{getWords}: Lee el archivo descrito por el la variable path y devuelve un set de string, el cual contiene todas las palabras no reservadas y omite las secciones de comentarios.
+  \item \emph{getComments}: Lee el archivo descrito por el la variable path y devuelve un set de string, A diferencia de getWords, getComments omite la sección de código y solamente se centra en los comentarios, siendo así un string por línea de comentarios.
+  \item  \emph{getLines}: Lee el archivo descrito por el la variable path y devuelve un set de string, al igual que getWords, ignora los comentarios pero este método devuelve la linea completa de código.
+  \item \emph{getSecuence}:
+\end{itemize}
+
+Es importante recalcar que para utilizar los objetos de clase FileReader es necesario inicializar la clase con el método initialize. si el fileReader posee la bandera good en falso, no será inicializado por lo que los métodos devolverán null.
+Esta clase no es usada directamente por el usuario sino a travez de la clase FileComparator la cual genera un objeto FileReader por cada uno de los archivos que son ingresados por el usuario.\\
+
+\subsubsection{Clase FileComparator}
+
+La clase FileComparator se encarga de inicializar los objetos necesarios para hacer la lectura y una vez inicializados es posible realizar las comparaciones entre los archivos. los métodos que posee esta clase son los siguientes:
+
+\begin{itemize}
+  \item \emph{FileComparator}: Constructor de la clase, crea 2 objetos de  la clase FileReader y establece la bandera good.
+  \item \emph{initialize}: Inicializa la clase FileComparator, obtiene los sets de palabras, comentarios y lineas necesarios para realizar la comparación, esto solo se realiza si la bandera de good esta en verdadero.
+  \item \emph{compWord}: Compara la cantidad de palabras que se encuentran en el archivo 1 con las palabras del archivo 2, devuelte un flotante con el porcentaje de palabras encontradas.
+  \item\emph{ compPWord}: Compara la cantidad de palabras parciales que se encuentran en el archivo 1 con las palabras del archivo 2 además ignora las palabras completas que se encuentren repetidas, devuelte un flotante con el porcentaje de palabras parciales encontradas.
+  \item \emph{compCom}: Compara la cantidad de líneas de comentarios que se encuentran en el archivo 1 con las líneas de comentarios  del archivo 2, devuelte un flotante con el porcentaje de comentarios encontrados.
+  \item \emph{compLines}: Compara la cantidad de líneas de codigo que se encuentran en el archivo 1 con las líneas de codigo  del archivo 2, devuelte un flotante con el porcentaje de líneas encontrados.
+    \item \emph{compseq}: Compara las secuencias de código encontradas del archivo 1 con las lineas de secuencia del archivo 2, devuelte un flotante con el porcentaje de secuencia encontrado.
+  \item \emph{getTotal}:devuelve el total ponderado de similitud entre los 2 archivos. se utiliza los indices de 0,6 para palabras iguales, 0,05 para palabras parecidas, 0,15 para líneas de codigo, 0,1 para líneas de comentarios y 0,1 para secuencias
+\end{itemize}
+
+Es importante recalcar que para utilizar los objetos de clase Filecomparator es necesario inicializar la clase con el método initialize.
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------MANUAL-------------------------------------------
+%--------------------------------------------------------------------------
+\section[Manual de usuario]{Manual de usuario}
+\subsection{Requerimientos}
+El sistema posee los siguientes requerimientos para su correcto funcionamiento
+\begin{itemize}
+  \item Sistema operativo Fedora
+  \item Arquitectura 64 bits o 32 bits
+  \item Ambiente Code::Blocks
+  \item Compilador: GNU GCC compiler
+\end{itemize}
+
+\subsection[Restricciones]{Restricciones del programa}
+\begin{itemize}
+  \item El sistema solamente puede ser ejecutado desde la terminal.
+  \item El sistema solo es capaz de procesar 2 archivos a la vez, estos deben ser enviados como parametros al ejecutarlo en la terminal.
+  \item El sistema solamente trabaja con archivos codificados en UTF-8 y codigos fuente del lenguaje C. 
+  \item Al ingresar un número de parámetros incorrecto o no encontrados el programa no se ejecuta y se detiene mostrando un mensaje
+  \end{itemize}
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------PRUEBAS-------------------------------------------
+%--------------------------------------------------------------------------
+\section{Casos de prueba}
+\subsection{Ambos archivos en blanco}
+Se realiza la prueba con archivos en blanco por lo que en forma son archivos con códigos iguales. Dado que al no haber palabras ni comentarios se espera que se encuentren al 100\% de igualdad. esto se puede observar en 
+\begin{figure}[hb]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{prueba1.png}
+    \caption{Prueba 1: 2 archivos vaciós.}
+    
+    \label{fig:01}
+  \end{center}
+\end{figure}
+
+
+\subsection{Archivos iguales con contenido unicamente de código}
+Se realiza una prueba con 2 archivos que poseen una serie de palabras aleatorias incluyendo reservadas, debido a que son iguales y por restricción de que una palabra igual no
+\begin{figure}[hb]
+  \begin{center}
+    \includegraphics[width=0.5\textwidth]{prueba2.png}
+    \caption{Prueba 1: 2 archivos vaciós.}
+    
+    \label{fig:01}
+  \end{center}
+\end{figure}
+
+\newpage
+
+\section{Bibliografía}
+
+[1] Silberchatz, Abraham, Galvin, Peter \& Gagne, Greg. {\em  Operating Systems Concepts.} Novena edición, Addison Wesley Publishing Co., Mass., 2013 
+\end{document}

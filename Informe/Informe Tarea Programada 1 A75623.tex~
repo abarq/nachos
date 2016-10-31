@@ -1,0 +1,188 @@
+
+% Universidad de Costa Rica
+% Plantilla para documentación
+% Elaborado por Isabel Chaves & Andreína Alvarado
+\documentclass[12pt]{article}
+\usepackage{vmargin}
+\setpapersize{A4}
+\setmargins{2.25cm}  % margen izquierdo
+{1.5cm}              % margen superior
+{16.5cm}             % anchura del texto
+{23.42cm}            % altura del texto
+{10pt}               % altura de los encabezados
+{1cm}                % espacio entre el texto y los encabezados
+{0pt}                % altura del pie de página
+{2cm}          
+\usepackage{blindtext}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern, textcomp}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{color}
+\usepackage{xcolor}
+\setpapersize{A4}
+\usepackage{graphicx}
+\usepackage{array}
+\definecolor{verdigris}{rgb}{0.26, 0.7, 0.68}
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\definecolor{aquamarine}{rgb}{0.5, 1.0, 0.83}
+\definecolor{unitednationsblue}{rgb}{0.36, 0.57, 0.9}
+\definecolor{pastelblue}{rgb}{0.68, 0.78, 0.81}
+\definecolor{turquoise}{rgb}{0.19, 0.84, 0.78}
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{turquoisegreen}{rgb}{0.63, 0.84, 0.71}
+\definecolor{uclablue}{rgb}{0.33, 0.41, 0.58}
+\definecolor{beaublue}{rgb}{0.74, 0.83, 0.9}
+\definecolor{bluegray}{rgb}{0.4, 0.6, 0.8}
+\definecolor{cyan(process)}{rgb}{0.0, 0.72, 0.92}
+\definecolor{bubbles}{rgb}{0.91, 1.0, 1.0}
+\usepackage{tabu}
+\usepackage{amsmath}
+\usepackage[spanish]{babel}
+\RequirePackage{fancyhdr}
+\RequirePackage{fancybox}
+\begin{document}
+\sffamily
+
+
+\begin{center}
+	\LARGE\textbf{Universidad de Costa Rica}\\
+	\textbf{Facultad de Ingeniería}\\
+	\textbf{Escuela de Ciencias de la Computación e Informática}\\ \ \\
+	\Large 	CI-1310 Sistemas Operativos\\
+	Grupo $02$\\
+	II Semestre
+\end{center}
+
+
+\begin{center}
+	\huge\textbf{Tarea programada \#0}
+\end{center}
+
+\begin{center}
+	\LARGE\textbf{Profesor:}\\
+	Francisco Arroyo\\ \ \\ \ \\
+	\LARGE\textbf{Estudiante:}\\
+	Steven Rojas Lizano 1 $|$ A75623\\
+	
+	\textbf{ \today}
+\end{center}
+\thispagestyle{empty}
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------INDICE----------------------------------------------
+%--------------------------------------------------------------------------
+\tableofcontents
+
+\thispagestyle{empty}
+\newpage\setcounter{page}{1}
+
+%--------------------------------------------------------------------------
+%----------------------INTRODUCCION----------------------------------------
+%--------------------------------------------------------------------------
+\newpage
+\section[introducción]{Introducción}
+
+Se realizó una versión mejorada de la tarea programada 0 donde se tienen los mismos esquemas de leer archivos y comparar la similitud entre ambos. Adicionalmente se agregó la capacidad de realizar la cuenta de la cantidad de palabras reservadas que se encontraban en ambos archivos, esto para ser enviadas por mensajes a través de la cola de mensajes de linux. Donde un proceso padre se encarga de recibir dichos mensajes y desplegarlos en pantalla. 
+%\newpage
+
+%--------------------------------------------------------------------------
+%----------------------OBJETIVOS-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Objetivos]{Objetivos}
+\begin{itemize}
+  \item     Construir programas que aprovechen mejor los recursos disponibles en las computadoras modernas.
+  \item    Aplicar los conocimientos sobre tópicos de comunicación entre procesos (IPC) y sincronizar varios procesos
+  \item    Encapsular en clases de C++ la funcionalidad de los semáforos y paso de mensajes
+  \item    Utilizar en un programa semáforos y paso de mensajes como métodos de sincronización
+  \item    Utilizar en un programa segmentos de memoria compartida para intercambio de información entre procesos
+\end{itemize}
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------DESCRIPCION-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Descripción]{Descripción}
+\begin{itemize}
+  \item  desarrollar un programa en el lenguaje de programación C++, orientado al sistema operativo UNIX y utilizar todas las facilidades para la comunicación entre procesos (IPC) en ese ambiente
+  \item Debe construirse un programa que creará un número determinado de procesos (fork) que le ayudarán a completar su tarea.
+  \item El programa debe comparar varios archivos fuentes en C, C++ o Java y establecer la similaridad entre ellos, dos a dos, semejante a la primera tarea programada
+  \item (tarea 0), pero esta vez con varios archivos fuente
+  \item Es garantizado que los programas a analizar compilan sin errores
+  \item Además, esta tarea debe contar el total de palabras reservadas del lenguaje elegido que existen en todos los archivos fuente y brindar un total al finalizar       \end{itemize}
+  \subsection{ Hijos}
+    \begin{itemize}
+      \item     El proceso principal creará (fork) tantos procesos hijos como nombres de archivos se haya especificado, de tal manera que cada hijo se encargue de comparar dos archivos únicamente
+    \item    La cantidad de palabras reservadas encontradas debe enviarse por medio de mensajes al proceso principal, tome en cuenta que cada hijo debe mandar el total de palabras de sus dos archivos
+    \item Los datos de comparación deberán ser escritos en un archivo independiente para cada hijo, debe escoger un nombre para este archivo que no tenga conflictos con los demás hijos
+    \item    El programa principal debe contar con otro hijo (desplegador) para producir la salida del programa, que se trata del total de palabras reservadas existentes en todos los archivos
+    \item Cada uno de los hijos abrirá los dos archivos asignados por el proceso principal, cuando se encuentre listo el hijo comenzará a enviar la cantidad de palabras reservadas al proceso principal, utilizando para ello paso de mensajes
+\item     Cuando la tarea asignada a un hijo se acabe este debe informar al proceso principal, utilizando un mensaje de tipo especial
+
+\end{itemize}
+
+
+%--------------------------------------------------------------------------
+%----------------------DESARROLLO-------------------------------------------
+%--------------------------------------------------------------------------
+\section[Desarrollo]{Desarrollo}
+\subsection{Creación de clases}
+Para implementar la solución del problema fue necesario la creación de 3 nuevas clases, las cuales se agregaron a la tarea anterior. 
+\subsubsection{Clase Semaphore}
+Clase encapsulada del tipo semáforo para mantener el control y la sincronización de los procesos, los métodos utilizados son los mostrados en el libro de referencia y el laboratorio del curso
+\subsubsection{Clase Message}
+  Al igual que la clase Semaphore, esta clase encapsula el envío y la recepción de los mensajes, además se le agregaron los siguientes métodos:
+  \begin{itemize}
+    \item \emph{SendMap}: Método que recibe un mapa de string,int y envía mensajes iterando por dicho mapa hasta que este se acabe.
+    \item \emph{ReceiveMap}:Método que recibe como parámetro la dirección de un mapa donde guarda todos los mensajes de todos los tipos que se encuentren en la clase reservedWords. Este método leerá mensajes del mismo tipo hasta que de error del tipo NOMSG, al darse este error sigue con el siguiente tipo de palabra reservada.
+  \end{itemize}
+  \subsubsection{clase ReservedWords}
+    Esta es una clase que contiene un mapa que encapsula todas las palabras reservadas, por lo cual es utilizado para la lectura de los archivos, el envío de mensajes y la recepción de los mismos.
+    
+\subsection[Actualización de Clases]{Actualización de clases}
+para agregar la funcionalidad deseada fue necesario actualizar las 2 clases propuestas en la tarea 0, esto se muestra a continuación.
+\subsubsection{Clase FileReader}
+Se agregó el método GetreservedCount el cual busca en el archivo todas las palabras reservadas y las va guardando en un mapa string int el cual devolverá.
+
+\subsubsection{Clase FileComparator}
+Para esta clase se agregó un método igual al de fileReader el cual se encarga de pasar a un nivel superior los mapas encontrados por los archivos
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------MANUAL-------------------------------------------
+%--------------------------------------------------------------------------
+\section[Manual de usuario]{Manual de usuario}
+\subsection{Requerimientos}
+El sistema posee los siguientes requerimientos para su correcto funcionamiento
+\begin{itemize}
+  \item Sistema operativo Fedora
+  \item Arquitectura 64 bits o 32 bits
+  \item Ambiente Code::Blocks
+  \item Compilador: GNU GCC compiler
+\end{itemize}
+
+\subsection[Restricciones]{Restricciones del programa}
+\begin{itemize}
+  \item El sistema solamente puede ser ejecutado desde la terminal.
+  \item El sistema solamente trabaja con archivos codificados en UTF-8 y codigos fuente del lenguaje C. 
+  \item Al ingresar un número de parámetros incorrecto o no encontrados el programa no se ejecuta y se detiene mostrando un mensaje
+  \end{itemize}
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------PRUEBAS-------------------------------------------
+%--------------------------------------------------------------------------
+\section{Bibliografía}
+
+[1] Silberchatz, Abraham, Galvin, Peter \& Gagne, Greg. {\em  Operating Systems Concepts.} Novena edición, Addison Wesley Publishing Co., Mass., 2013 
+\end{document}

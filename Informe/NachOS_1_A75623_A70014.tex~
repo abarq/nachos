@@ -1,0 +1,161 @@
+
+% Universidad de Costa Rica
+% Plantilla para documentación
+% Elaborado por Isabel Chaves & Andreína Alvarado
+\documentclass[12pt]{article}
+\usepackage{vmargin}
+\setpapersize{A4}
+\setmargins{2.25cm}  % margen izquierdo
+{1.5cm}              % margen superior
+{16.5cm}             % anchura del texto
+{23.42cm}            % altura del texto
+{10pt}               % altura de los encabezados
+{1cm}                % espacio entre el texto y los encabezados
+{0pt}                % altura del pie de página
+{2cm}          
+\usepackage{blindtext}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern, textcomp}
+\usepackage{amsmath}
+\usepackage{mathtools}
+\usepackage{amsmath}
+\usepackage{hhline}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{colortbl}
+\usepackage{color}
+\usepackage{xcolor}
+\setpapersize{A4}
+\usepackage{graphicx}
+\usepackage{array}
+\definecolor{verdigris}{rgb}{0.26, 0.7, 0.68}
+\definecolor{airforceblue}{rgb}{0.36, 0.54, 0.66}
+\definecolor{aquamarine}{rgb}{0.5, 1.0, 0.83}
+\definecolor{unitednationsblue}{rgb}{0.36, 0.57, 0.9}
+\definecolor{pastelblue}{rgb}{0.68, 0.78, 0.81}
+\definecolor{turquoise}{rgb}{0.19, 0.84, 0.78}
+\definecolor{babyblueeyes}{rgb}{0.63, 0.79, 0.95}
+\definecolor{turquoisegreen}{rgb}{0.63, 0.84, 0.71}
+\definecolor{uclablue}{rgb}{0.33, 0.41, 0.58}
+\definecolor{beaublue}{rgb}{0.74, 0.83, 0.9}
+\definecolor{bluegray}{rgb}{0.4, 0.6, 0.8}
+\definecolor{cyan(process)}{rgb}{0.0, 0.72, 0.92}
+\definecolor{bubbles}{rgb}{0.91, 1.0, 1.0}
+\usepackage{tabu}
+\usepackage{amsmath}
+\usepackage[spanish]{babel}
+\graphicspath{{images/}}
+\RequirePackage{fancyhdr}
+\RequirePackage{fancybox}
+\begin{document}
+\sffamily
+
+
+\begin{center}
+	\LARGE\textbf{Universidad de Costa Rica}\\
+	\textbf{Facultad de Ingeniería}\\
+	\textbf{Escuela de Ciencias de la Computación e Informática}\\ \ \\
+	\Large 	CI-1310 Sistemas Operativos\\
+	Grupo $02|$1\\
+	II Semestre
+\end{center}
+
+
+\begin{center}
+	\huge\textbf{Tarea programada NachOS\#1}
+\end{center}
+
+\begin{center}
+	\LARGE\textbf{Profesor:}\\
+	Francisco Arroyo\\ \ \\ \ \\
+	\LARGE\textbf{Estudiantes:}\\
+	Dennis Abarca Quesada $|$ A70014 $|$ grupo 01\\	
+	Steven Rojas Lizano 1 $|$ A75623 $|$ grupo 02\\
+	
+	\textbf{ \today}
+\end{center}
+\thispagestyle{empty}
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------INDICE----------------------------------------------
+%--------------------------------------------------------------------------
+\tableofcontents
+
+\thispagestyle{empty}
+\newpage\setcounter{page}{1}
+
+%--------------------------------------------------------------------------
+%----------------------INTRODUCCION----------------------------------------
+%--------------------------------------------------------------------------
+\newpage
+\section[introducción]{Introducción}
+En esta tarea programada se realizó la implementación de los llamados al sistema de nachOS, en los cuales se realizaron modificaciones a los archivos de addresSpace, system, exception y machine.\\
+
+%\newpage
+
+%--------------------------------------------------------------------------
+%----------------------OBJETIVOS-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Objetivos]{Objetivos}
+\begin{itemize}
+  \item    Leer y entender la parte del sistema operativo NachOs que se encuentra en la carpeta descargable.
+  \item    Implantar el manejo de excepciones y llamados al sistema. 
+  \item    Implantar multiprogramación. 
+  \item    Implantar programas de usuario multi-hilos.
+\end{itemize}
+
+\newpage
+
+%--------------------------------------------------------------------------
+%----------------------DESCRIPCION-------------------------------------------
+%--------------------------------------------------------------------------
+
+\section[Descripción]{Descripción}
+\include{Partes/Descripcion}
+
+
+%--------------------------------------------------------------------------
+%----------------------DESARROLLO-------------------------------------------
+%--------------------------------------------------------------------------
+\section[Desarrollo]{Desarrollo}
+\include{Partes/Desarrollo.tex}
+
+%--------------------------------------------------------------------------
+%----------------------PRUEBAS-------------------------------------------
+%--------------------------------------------------------------------------
+\newpage
+\section{Pruebas}
+\include{Partes/Pruebas}
+
+
+
+
+
+%--------------------------------------------------------------------------
+%----------------------MANUAL-------------------------------------------
+%--------------------------------------------------------------------------
+\newpage
+\section[Manual de usuario]{Manual de usuario}
+\subsection{Requerimientos}
+El sistema posee los siguientes requerimientos para su correcto funcionamiento
+\begin{itemize}
+  \item Sistema operativo Fedora
+  \item Arquitectura 64 bits
+  \item Ambiente NachOS 
+  \item Compilador: GNU GCC compiler
+\end{itemize}
+
+\subsection[Restricciones]{Restricciones del programa}
+\begin{itemize}
+  \item El sistema solamente puede ser ejecutado desde la terminal.
+  \item El sistema solamente trabaja con archivos codificados en UTF-8 y codigos fuente del lenguaje C. 
+  \end{itemize}
+\newpage
+
+
+\section{Bibliografía}
+
+[1] Silberchatz, Abraham, Galvin, Peter \& Gagne, Greg. {\em  Operating Systems Concepts.} Novena edición, Addison Wesley Publishing Co., Mass., 2013 
+\end{document}

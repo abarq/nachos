@@ -1,0 +1,20 @@
+\subsection{Creación de clases}
+Para implementar la solución del problema fue necesario la creación de 3 nuevas clases, las cuales se agregaron a la tarea anterior. 
+\subsubsection{Clase Semaphore}
+Clase encapsulada del tipo semáforo para mantener el control y la sincronización de los procesos, los métodos utilizados son los mostrados en el libro de referencia y el laboratorio del curso
+\subsubsection{Clase Message}
+  Al igual que la clase Semaphore, esta clase encapsula el envío y la recepción de los mensajes, además se le agregaron los siguientes métodos:
+  \begin{itemize}
+    \item \emph{SendMap}: Método que recibe un mapa de string,int y envía mensajes iterando por dicho mapa hasta que este se acabe.
+    \item \emph{ReceiveMap}:Método que recibe como parámetro la dirección de un mapa donde guarda todos los mensajes de todos los tipos que se encuentren en la clase reservedWords. Este método leerá mensajes del mismo tipo hasta que de error del tipo NOMSG, al darse este error sigue con el siguiente tipo de palabra reservada.
+  \end{itemize}
+  \subsubsection{clase ReservedWords}
+    Esta es una clase que contiene un mapa que encapsula todas las palabras reservadas, por lo cual es utilizado para la lectura de los archivos, el envío de mensajes y la recepción de los mismos.
+    
+\subsection[Actualización de Clases]{Actualización de clases}
+para agregar la funcionalidad deseada fue necesario actualizar las 2 clases propuestas en la tarea 0, esto se muestra a continuación.
+\subsubsection{Clase FileReader}
+Se agregó el método GetreservedCount el cual busca en el archivo todas las palabras reservadas y las va guardando en un mapa string int el cual devolverá.
+
+\subsubsection{Clase FileComparator}
+Para esta clase se agregó un método igual al de fileReader el cual se encarga de pasar a un nivel superior los mapas encontrados por los archivos

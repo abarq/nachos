@@ -1,0 +1,12 @@
+\section[Descripción]{Descripción}
+\begin{enumerate}
+  \item Implantar el manejo de excepciones y llamados al sistema. Se deben soportar todos los llamados al sistema definidos en "syscall.h". Presentamos una rutina en ensamblador "syscall" que provee la manera de invocar un llamado al sistema desde una rutina C (Unix tiene un método similar, intente "man syscall"). Usted necesita completar la parte 2 de esta asignación con el fin de probar los llamados al sistema "exec" y "wait"
+  \item Implantar multiprogramación. El código que presentamos le restringe a solo poder correr un programa de usuario a la vez. Usted necesita:
+   \begin{enumerate}
+     \item Encontrar la manera de asignar los marcos de memoria física de tal manera que varios programas de usuario puedan ser colocados en la memoria principal a la vez. (ver "bitmap.h")
+     \item Proveer una manera de copiar datos desde/hacia el kernel desde/hacia el espacio de direcciones virtual del usuario (ahora las direcciones que el programa del usuario 've' no son las mismas que el kernel 've')
+   \end{enumerate}       
+   \item Agregar sincronización a las rutinas que crean e inician el espacio de direcciones, de tal manera que puedan ser accedidas concurrentemente por múltiples programas. Note que "scheduler.cc" ahora guarda y recupera el estado de la máquina en los cambios de contexto. Es deseable tener algunas rutinas como "cp" y "cat" de Unix, y utilizar el shell que proveemos en el directorio "test" para verificar el manejo de llamados al sistema y la multiprogramación
+    \item Implantar programas de usuario multi-hilos. Implante los llamados al sistema "fork" y "yield", que le permita al usuario llamar a una rutina en el mismo espacio de direccionamiento, y hacer ping pong entre los hilos (Ayuda: necesita cambiar la manera actual del kernel para asignar memoria en el espacio de direcciones del usuario para cada una de las pilas de los threads)
+    \item (Extra, por 5\% )La versión actual del llamado al sistema "exec" no ofrece ninguna manera para que el usuario pueda pasar parámetros o argumentos al nuevo espacio de direcciones creado. Unix permite ésto, por ejemplo, se pueden pasar argumentos en la línea de comandos al nuevo espacio de direcciones. Implantar esta funcionalidad del "exec"
+\end{enumerate}
