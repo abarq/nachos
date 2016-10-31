@@ -219,33 +219,34 @@ void Nachos_Read(){
 
 void Nachos_Close(){
 
-	int nachosHandle;
 
-	if(machine->ReadMem(4,1,&nachosHandle)){
-
-		int unixHandle = currentThread->openFilesTable->getUnixHandle(nachosHandle);
-	
-		if(close(unixHandle)==0){
-
-			if(currentThread->openFilesTable->Close(nachosHandle)==1){
-
-				printf("El archivo se cerro correctamente");
-
-			}	
+	int id = machine->ReadRegister(4);
 
 
-		}else{
+	if(id<3 || !(currentThread->openFilesTable->openFilesMap->Test(id))){
 
-			printf("No se concreto el Close");
+
+		printf("El id no es valido, no se pudo ejecutar Close");
+
+
+	}else{
+
+
+		int nachosHandle = currentThread->openFilesTable->getUnixHandle(id);
+		close(nachosHandle);
+		if(currentThread->openFilesTable->Close(id) == 1){
+
+
+			printf("El archivo se cerro correctamente");
 
 		}
 
 
-
 	}
-
+	
 
 }
+
 
 
 void Nachos_Exit(){
@@ -276,45 +277,7 @@ void Nachos_Join(){
 	returnFromSystemCall();
 }
 
-void Nachos_Exec(){
-
-	char* nombreEjecutable = leerEntrada();
-	OpenFile *executable = fileSystem->Open(nombreEjecutable); 	
-
-  	if (executable == NULL) { 
-                                    // Si el archivo no existe 
-		printf("No se puede abrir el archivo %s\n", nombreExe);
-      	  machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
-		return -1;
-
-   	}
-
- 	delete executable;   
-
-    	int id = pageTableMap->Find();
-
-    	if(id != -1){                   // Si el archivo existe
-        
-       		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
-       		strcpy(nombreEx, nombreExe);                      // Guardo el nombre a una variable global
-       		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
-       		hilosActuales[id]->id = id;                       // Le asigno el id
-       		hilosActuales[id]->Fork(ExeAux, 1);               // Pongo a correr el hilo
-       		printf("Se puso a correr el archivo\n");
-
-    	}else{
-
-       		 printf("No hay espacio para abrir el archivo %s\n", nombreEx);
-        	delete executable;
-   	 }
-
-   	 machine->WriteRegister(2, id);
-   	 return id;
-
-
-}
-
-void ExeAux (int nada){
+void ExeAux (void* nada){
 
     printf("Se esta ejecutando el archivo %s\n", nombreEx);
 
@@ -334,6 +297,47 @@ void ExeAux (int nada){
 }
 
 
+void Nachos_Exec(){
+
+	char* nombreEjecutable = leerEntrada();
+	OpenFile *executable = fileSystem->Open(nombreEjecutable); 	
+
+  	if (executable == NULL) { 
+                                    // Si el archivo no existe 
+		printf("No se puede abrir el archivo %s\n", nombreEjecutable);
+      	  machine->WriteRegister(2, -1);                            // Indica retorna un valor ilegal
+
+
+   	}
+
+ 	delete executable;   
+
+    	int id = pageTableMap->Find();
+
+    	if(id != -1){                   // Si el archivo existe
+        
+       		semExec->P();                                     // Semaforo tipo mutex para proteger la variable nombreEx
+       		strcpy(nombreEx, nombreEjecutable);                      // Guardo el nombre a una variable global
+       		hilosActuales[id] = new Thread("Nuevo hilo");     // Creo un nuevo hilo
+       		hilosActuales[id]->id = id;                       // Le asigno el id
+       		hilosActuales[id]->Fork(ExeAux, (void*)1);               // Pongo a correr el hilo
+       		printf("Se puso a correr el archivo\n");
+
+    	}else{
+
+       		 printf("No hay espacio para abrir el archivo %s\n", nombreEx);
+        	delete executable;
+   	 }
+
+   	 machine->WriteRegister(2, id);
+
+
+
+}
+
+
+
+
 
 
 void Nachos_Yield(){
@@ -346,12 +350,13 @@ void Nachos_Yield(){
 /**
  * Método auxiliar para la creación de un nuevo hilo, llamado por el Nachos_Fork()
  */
-void NachosForkThread(int reg){
+void NachosForkThread(void* reg){
 
+    int reg2= *(int*) reg;
     printf("Nuevo Hilo ejecutandose\n");
     machine->WriteRegister(PrevPCReg, machine->ReadRegister(PCReg));
-    machine->WriteRegister(PCReg, reg);                              //Se mete al PC la direccion de la funcion a ejecutar
-    machine->WriteRegister(NextPCReg, reg+4);
+    machine->WriteRegister(PCReg, reg2);                              //Se mete al PC la direccion de la funcion a ejecutar
+    machine->WriteRegister(NextPCReg, reg2+4);
     machine->WriteRegister(RetAddrReg,4);                            //Se asigna la direccion de retorno
 
     machine->Run();                                                  //Corre el hilo que esta listo
@@ -391,11 +396,11 @@ void NachosForkThread(int reg){
 
 int Nachos_SemCreate(){
 
-   int pos = bitmapSemaforos->Find();             // Busca una posicion libre en el Bitmap 
+	int pos = bitmapSemaforos->Find();             // Busca una posicion libre en el Bitmap 
 
-    if(pos!=-1){                                     // Si hay espacio
+	if(pos!=-1){                                     // Si hay espacio
 
-        Semaphore* nuevoSem = new Semaphore("Sem", machine->ReadRegister(4));    // crea el nuevo semaforo con su respectivo valor inicial
+        	Semaphore* nuevoSem = new Semaphore("Sem", machine->ReadRegister(4));// crea el nuevo semaforo con su respectivo valor inicial
         semaforosActuales[pos] = nuevoSem;                                       // y lo guarda
         printf("Se creo un semaforo con id %d\n", pos);
 
@@ -407,6 +412,7 @@ int Nachos_SemCreate(){
     machine->WriteRegister(2, pos);                  // Guarda en el registro 2 el id
 
 
+   return pos;
 }
 
 

@@ -23,7 +23,9 @@ BitMap * pageTableMap;
 BitMap * bitmapSemaforos;
 BitMap * hilosMap;
 Semaphore* semaforosActuales[20];
-Thread *hilosActuales[MAX]; 
+Thread *hilosActuales[MaxHilos]; 
+Semaphore* semExec;                          // Semaforo tipo mutex para proteger la variable nombreEx
+char nombreEx[100];                          // Variable para colocar el nombre del archivo que Exec va a ejecutar
 
 // 2007, Jose Miguel Santos Espino
 PreemptiveScheduler* preemptiveScheduler = NULL;
@@ -100,9 +102,11 @@ Initialize(int argc, char **argv)
     
 #ifdef USER_PROGRAM
     bool debugUserProg = false;	// single step user program
-	pageTableMap=new BitMap(32);
-    bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
+	
+	pageTableMap = new BitMap(32);
+  	bitmapSemaforos = new BitMap(10); //Cantidad de semaforos = 10;
 	hilosMap	= new BitMap(20);
+	semExec = new Semaphore("semExec", 1);
 
 #endif
 #ifdef FILESYS_NEEDED
