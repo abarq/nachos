@@ -101,8 +101,6 @@ void Nachos_Open(){
 	int descriptor = open(buffer,O_RDWR);   //Llamado de open de Unix, devuelve un descriptor de la tabla de archivos abiertos.
 
 	int respuestaOpen = currentThread->openFilesTable->Open(descriptor); //Devuelve si el metodo opn fue exitoso.
-	currentThread->openFilesTable->Print();
-	printf("%d\n", respuestaOpen);
 
 	if(respuestaOpen == -1){  //En caso de que devuelve
 
@@ -161,7 +159,6 @@ void Nachos_Write(){
 				int unixHandle = currentThread->openFilesTable->getUnixHandle(id);
 
 				int cantidadCaracteresEscritos = write(unixHandle, buffer2, size);
-				printf("la cantidad de caracteres escritos es: %d\n",unixHandle);
 				stats->numDiskWrites++; //Actualiza las estadisticas de escritura en stats.
 	
 			break;
@@ -197,20 +194,20 @@ void Nachos_Read(){
 		bytesLeidos = read(unixHandle, temp, size);
 	
 		printf("La cantidad de bytes leidos son: %d\n",bytesLeidos);
-
-		for(int i = 0; i < size; i++){ 
-
-         		machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
-      		}
 		
+		//for(int i = 0; i < size; i++){ 
+
+         	//	machine->WriteMem((int)*(buffer + i), 1, (int)temp[i]);     // Hay que guardar en memoria byte por byte los datos
+      		//}
+		printf("Saliendo de read\n");	
 		delete[] temp;
 		
 
 	}
 
-		printf("La cantidad de caracteres leidos es: %d\n", bytesLeidos);
-		fflush(stdout);
+
 		machine->WriteRegister(2,bytesLeidos);
+
 
 
 }
@@ -237,7 +234,7 @@ void Nachos_Close(){
 		if(currentThread->openFilesTable->Close(id) == 1){
 
 
-			printf("El archivo se cerro correctamente");
+			printf("El archivo se cerro correctamente\n");
 
 		}
 
@@ -345,7 +342,7 @@ void ExeAux (void* nada){
 
 void Nachos_Exec(){
 
-	printf("Se ingreso al SC Exec");
+	printf("Se ingreso al SC Exec\n");
 	char* nombreEjecutable = leerEntrada();
 	OpenFile *executable = fileSystem->Open(nombreEjecutable); 	
 
@@ -427,7 +424,7 @@ void NachosForkThread(void* reg){
 		newT->Fork(NachosForkThread,(void*)registro);		//se realiza el Fork con el método auxiliar
 		hilosActuales[id] = newT;					//finalmente se agrega el hilo al vector de hilos actuales
 		printf("Se ha creado el nuevo hilo\n");
-		hilosActuales[id]->sem->P();
+		//hilosActuales[id]->sem->P();
 
     }
 
