@@ -14,6 +14,7 @@
 {0pt}                % altura del pie de página
 {2cm}          
 \usepackage{blindtext}
+\usepackage{listings}
 \usepackage[utf8]{inputenc}
 \usepackage{lmodern, textcomp}
 \usepackage{amsmath}
@@ -41,6 +42,25 @@
 \definecolor{bluegray}{rgb}{0.4, 0.6, 0.8}
 \definecolor{cyan(process)}{rgb}{0.0, 0.72, 0.92}
 \definecolor{bubbles}{rgb}{0.91, 1.0, 1.0}
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\definecolor{mygreen}{rgb}{0,0.8,0.6}
+\definecolor{myorange}{rgb}{1.0,0.4,0}
+\lstset{
+basicstyle=\footnotesize\sffamily\color{black},
+commentstyle=\color{mygray},
+frame=single,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny\color{mygray},
+keywordstyle=\color{mygreen},
+showspaces=false,
+showstringspaces=false,
+stringstyle=\color{myorange},
+tabsize=2,
+language=C++,
+emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}
+}
 \usepackage{tabu}
 \usepackage{amsmath}
 %\\usepackage[spanish]{babel}
@@ -106,9 +126,9 @@ En esta tarea programada se realizó la implementación de los llamados al siste
   \item    Implantar programas de usuario multi-hilos.
 \end{itemize}
 \include{Partes/Descripcion}
-\include{Partes/Desarrollo.tex}
+\include{Partes/Desarrollo}
 \include{Partes/Pruebas}
-
+ 
 
 
 
@@ -121,7 +141,7 @@ En esta tarea programada se realizó la implementación de los llamados al siste
 \subsection{Requerimientos}
 El sistema posee los siguientes requerimientos para su correcto funcionamiento
 \begin{itemize}
-  \item Sistema operativo Fedora
+  \item Sistema operativo Fedora o Ubuntu
   \item Arquitectura 64 bits
   \item Ambiente NachOS 
   \item Compilador: GNU GCC compiler
@@ -131,6 +151,9 @@ El sistema posee los siguientes requerimientos para su correcto funcionamiento
 \begin{itemize}
   \item El sistema solamente puede ser ejecutado desde la terminal.
   \item El sistema solamente trabaja con archivos codificados en UTF-8 y codigos fuente del lenguaje C. 
+  \item El simulador MIPS se basa en un único procesador.
+  \item el máximo número de páginas es de 32 y cada una es de 128 bytes por lo que los programas de usuario no deben ser mayores a 4kB
+  \item EL número máximo de hilos a guardar en la cola es de 20 hilos
   \end{itemize}
 \newpage
 

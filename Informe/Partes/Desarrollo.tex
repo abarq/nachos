@@ -1,21 +1,64 @@
 \section[Desarrollo]{Desarrollo}
-\subsection{Creación de clases}
-Para implementar la solución del problema fue necesario la creación de 3 nuevas clases, las cuales se agregaron a la tarea anterior. 
-\subsubsection{Clase Semaphore}
-Clase encapsulada del tipo semáforo para mantener el control y la sincronización de los procesos, los métodos utilizados son los mostrados en el libro de referencia y el laboratorio del curso
-\subsubsection{Clase Message}
-  Al igual que la clase Semaphore, esta clase encapsula el envío y la recepción de los mensajes, además se le agregaron los siguientes métodos:
-  \begin{itemize}
-    \item \emph{SendMap}: Método que recibe un mapa de string,int y envía mensajes iterando por dicho mapa hasta que este se acabe.
-    \item \emph{ReceiveMap}:Método que recibe como parámetro la dirección de un mapa donde guarda todos los mensajes de todos los tipos que se encuentren en la clase reservedWords. Este método leerá mensajes del mismo tipo hasta que de error del tipo NOMSG, al darse este error sigue con el siguiente tipo de palabra reservada.
-  \end{itemize}
-  \subsubsection{clase ReservedWords}
-    Esta es una clase que contiene un mapa que encapsula todas las palabras reservadas, por lo cual es utilizado para la lectura de los archivos, el envío de mensajes y la recepción de los mismos.
+  \subsection{Estrategia de implementación}   
+    La estrategia a utilizar para la solución del problema de la implementación de los llamados del sistema fue mediante la modificación de los archivos del systema operativo y la adición de las respectivas funciones en el archivo de exception, esto para poder atrapar los llamados al sistema cuando se ejecute una exception del tipo system call. \\
+    Gran parte de la estrategia a seguir fue dad mediante los laboratorios de Nachos 6 , 7 y 8 donde se realiza la separación de los casos de excepciones mediante un switch, la implementación de los llamados al sistema de open, read y write, fork. \\
+    Finalmente la creación del archivo de nachosFileTabla para poder tener un control de los archivos que se encontraban abiertos por los procesos activos. \\
+    Los demás llamados al sistema fueron implementados mediante la utilización de llamados al sitema de unix y métodos propios del sistema de NachOS como lo son el yield , exit y los llamados al sistema para la utilización de semáforos.
     
-\subsection[Actualización de Clases]{Actualización de clases}
-para agregar la funcionalidad deseada fue necesario actualizar las 2 clases propuestas en la tarea 0, esto se muestra a continuación.
-\subsubsection{Clase FileReader}
-Se agregó el método GetreservedCount el cual busca en el archivo todas las palabras reservadas y las va guardando en un mapa string int el cual devolverá.
+  \subsection{Archivos modificados}
+    Para la implemenentación de los llamados del sistema fueron necesarios realizar algunas modificaciones a los archivos principales del sistema operativo nachOS, los archivos de exception.cc, addressSpace tuvieron grandes cambios por lo que no se incluyen en el informe.\\
+    Sin embargo para el manejo de los hilos para el llamado de Fork fue necesario la utilización de un bitmap y un arreglo de hilos actuales, además para el uso de las páginas de memoria del simulador MIPS se utilizó también un bitmap para las páginas utilizadas. esto se puede ver en el siguiente extracto del archivo threads.h y threads,cc
+    \begin{lstlisting}
+class Thread{
+...
+    void Print() { printf("%s, ", name); }
+	
+    int id;
+    BitMap * waitingProcess;
+    Semaphore * sem;
+    int archivosUsados[MaxArchivos];
+    int numArchivosUsados;
 
-\subsubsection{Clase FileComparator}
-Para esta clase se agregó un método igual al de fileReader el cual se encarga de pasar a un nivel superior los mapas encontrados por los archivos
+  private:
+  ...
+    \end{lstlisting}
+    Luego se realiza la inicialización de estas variables en el constructor de la clase Thread.
+    \begin{lstlisting}
+
+Thread::Thread(const char* threadName)
+{
+    name = threadName;
+    stackTop = NULL;
+    stack = NULL;
+    status = JUST_CREATED;
+    openFilesTable = new NachosOpenFilesTable(); 
+    waitingProcess = new BitMap(20);
+    sem = new Semaphore("semaforo",0);
+    numArchivosUsados = 0;
+    for(int i = 0; i < 100; i++){
+    	archivosUsados[i] = -1;
+    }
+#ifdef USER_PROGRAM
+    space = NULL;
+#endif
+}
+    \end{lstlisting}
+     Además de la clase Thread, también se realizaron pequeñas modificaciones en la clase system para poder implementar los llamados al sistema
+     \begin{lstlisting}
+Class System{
+...
+  //variables nuevas
+  extern BitMap * pageTableMap;
+  extern BitMap * bitmapSemaforos;
+  extern Semaphore* semaforosActuales[20];
+  extern BitMap * hilosMap;
+  extern Thread *hilosActuales[MaxHilos]; 
+  extern Semaphore* semExec;                          
+  extern char nombreEx[100];                          
+  extern int *states;                                
+...
+}     
+     \end{lstlisting}
+     Estas variables son nuevamente declaradas en el archivo system.cc y luego inicializadas mediante el método initialize, cabe destacar que estas variables son declaradas como globales para todo el sistema operativo por lo que pueden ser accesadas desde cualquier parte del código.
+
+    

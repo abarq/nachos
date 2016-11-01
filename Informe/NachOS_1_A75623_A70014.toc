@@ -1,8 +1,14 @@
 \contentsline {section}{\numberline {1}introducci\IeC {\'o}n}{1}
 \contentsline {section}{\numberline {2}Objetivos}{1}
 \contentsline {section}{\numberline {3}Descripci\IeC {\'o}n}{2}
-\contentsline {section}{\numberline {4}Pruebas}{3}
-\contentsline {section}{\numberline {5}Manual de usuario}{4}
-\contentsline {subsection}{\numberline {5.1}Requerimientos}{4}
-\contentsline {subsection}{\numberline {5.2}Restricciones}{4}
-\contentsline {section}{\numberline {6}Bibliograf\IeC {\'\i }a}{5}
+\contentsline {section}{\numberline {4}Desarrollo}{3}
+\contentsline {subsection}{\numberline {4.1}Estrategia de implementaci\IeC {\'o}n}{3}
+\contentsline {subsection}{\numberline {4.2}Archivos modificados}{3}
+\contentsline {section}{\numberline {5}Pruebas}{5}
+\contentsline {subsection}{\numberline {5.1}Archivo prueba create1.c}{5}
+\contentsline {subsection}{\numberline {5.2}Archivo prueba: fork4.c}{6}
+\contentsline {subsection}{\numberline {5.3}Prueba pingPong.c}{6}
+\contentsline {section}{\numberline {6}Manual de usuario}{9}
+\contentsline {subsection}{\numberline {6.1}Requerimientos}{9}
+\contentsline {subsection}{\numberline {6.2}Restricciones}{9}
+\contentsline {section}{\numberline {7}Bibliograf\IeC {\'\i }a}{10}
