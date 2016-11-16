@@ -17,6 +17,10 @@
 #include "filesys.h"
 
 #define UserStackSize		1024 	// increase this as necessary!
+#define Max_Paginas		1024
+#define En_Disco          0
+#define En_Memoria        1
+#define No_inicializado   2
 
 class AddrSpace {
   public:
@@ -32,11 +36,16 @@ class AddrSpace {
     void SaveState();			// Save/restore address space-specific
     void RestoreState();		// info on a context switch 
 
-  private:
+  //private:
     TranslationEntry *pageTable;	// Assume linear page table translation
 					// for now!
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space
+
+    // Se refiere al archivo ejecutable
+    OpenFile * programa;
+    // Indica donde comienza el codigo
+    int inicioCodigo;
 };
 
 #endif // ADDRSPACE_H

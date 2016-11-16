@@ -19,6 +19,10 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
+#include "memoriaVirtual.h"
+
+
+MemoriaVirtual * virtualMem = new MemoriaVirtual();
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -83,15 +87,20 @@ AddrSpace::AddrSpace(OpenFile *executable)
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
 
-int pagEncontrada;
+    int pagEncontrada;
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 
 	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-        pagEncontrada = pageTableMap->Find();
-	pageTable[i].physicalPage = pagEncontrada;
-	pageTable[i].valid = true;
+        //pagEncontrada = pageTableMap->Find();
+	pageTable[i].physicalPage = -1;
+	#ifdef VM
+		pageTable[i].valid = false;
+	#else
+		pageTable[i].valid = true;
+	#endif
+
 	pageTable[i].use = false;
 	pageTable[i].dirty = false;
 	pageTable[i].readOnly = false;  // if the code segment was entirely on 
@@ -99,8 +108,13 @@ int pagEncontrada;
 					// pages to be read-only
 
         memset(machine->mainMemory + (pagEncontrada * PageSize), 0, PageSize);           // Inicializa con 0s el area
+	
+	#ifdef VM
+		
+	#else
+        	executable->ReadAt(&(machine->mainMemory[pagEncontrada*PageSize]), PageSize, (i*PageSize)+noffH.code.inFileAddr); // 			Copia la  informacion en memoria
+	#endif
 
-        executable->ReadAt(&(machine->mainMemory[pagEncontrada*PageSize]), PageSize, (i*PageSize)+noffH.code.inFileAddr); // Copia la informacion en memoria
     }
 }
 

@@ -617,6 +617,16 @@ void ExceptionHandler(ExceptionType which){
 
        break;
 
+       case PageFaultException:
+
+	    stats->numPageFaults++; 
+            int dir = machine->ReadRegister(BadVAddrReg);	//Lee la posicion que requeria
+	    int page = dir / PageSize;  
+	    if (currentThread->space->Cargar(page) == -1){	//Si no se puede cargar la pagina
+	             printf("No se puede cargar la pagina por falta de memoria");
+	    }
+	    break;
+
        default:
           printf( "Unexpected exception %d\n", which );
 
