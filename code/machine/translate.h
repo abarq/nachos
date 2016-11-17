@@ -40,6 +40,9 @@ class TranslationEntry {
 			// page is referenced or modified.
     bool dirty;         // This bit is set by the hardware every time the
 			// page is modified.
+    int state; //indica el estado de la pagina (ver addrspace.h)
+    int swapIndex; //indica la posicion en el archivo de memoria virtual
+
 };
 
 #endif

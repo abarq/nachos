@@ -30,6 +30,7 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <iostream>
+#include "bitmap.h"
 
 using namespace std;
 //En Exit() debe haber un Signal de un semaforo para que le 'avise' a Join() para que siga ejecutandose.
@@ -618,22 +619,30 @@ void ExceptionHandler(ExceptionType which){
        break;
 
        case PageFaultException:
+	   // printf("Estoy en exception\n");
+	   // fflush(stdout);
 
 	    stats->numPageFaults++; 
+
             int dir = machine->ReadRegister(BadVAddrReg);	//Lee la posicion que requeria
+
+		printf("%d\n", dir);
 	    int page = dir / PageSize;  
+	    printf("%d\n",page);
+	    //fflush(stdout);
 	    if (currentThread->space->Cargar(page) == -1){	//Si no se puede cargar la pagina
 	             printf("No se puede cargar la pagina por falta de memoria");
+
 	    }
 	    break;
 
-       default:
+    /*   default:
           printf( "Unexpected exception %d\n", which );
 
           break;
 
+	}*/
 	}
-
 }
 
 
