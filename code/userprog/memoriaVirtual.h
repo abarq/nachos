@@ -58,12 +58,16 @@ public:
 
     //Consigue una pagina de la memoria, la pone en el disco y modifica su estado
     int setPaginaDisco(AddrSpace *requester) {
-        int memIndex = -1, swapPageIndex = -1;	
+		int swapPageIndex = -1;	
+		//Busca un lugar en la memoria para colocar la pagina, (Pregunta si hay espacio)
+        int memIndex = memFisica->Find();
         AddrSpace* owner;
-        //Busca un lugar en la memoria para colocar la pagina, (Pregunta si hay espacio)
-        if ((memIndex = memFisica->Find()) == -1) {
+        printf("se tiene el indice %d de memoria fisica\n",memIndex);
+        if (memIndex  == -1) {
             //Si no hay espacio, busca una pagina para el remplazo
             memIndex = seleccionarPaginaVictima();
+           printf("dado que era -1 se seleccióno una victima\n se tiene el indice %d de memoria fisica\n",memIndex);
+
             owner = (AddrSpace*)padre[memIndex];
             for (int i=0,max = owner->numPages; i<max; i++) {
                 if (owner->pageTable[i].physicalPage == memIndex){

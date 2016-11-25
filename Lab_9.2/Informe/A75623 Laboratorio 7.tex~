@@ -1,0 +1,201 @@
+
+\documentclass[11pt]{article}
+\usepackage{vmargin}
+\usepackage{booktabs}
+\usepackage{amssymb}
+\usepackage{listings}
+\usepackage{color}
+\usepackage{graphicx,subfigure}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+\definecolor{mygray}{rgb}{0.4,0.4,0.4}
+\definecolor{mygreen}{rgb}{0,0.8,0.6}
+\definecolor{myorange}{rgb}{1.0,0.4,0}
+
+\lstset{
+basicstyle=\footnotesize\sffamily\color{black},
+commentstyle=\color{mygray},
+frame=single,
+numbers=left,
+numbersep=5pt,
+numberstyle=\tiny\color{mygray},
+keywordstyle=\color{mygreen},
+showspaces=false,
+showstringspaces=false,
+stringstyle=\color{myorange},
+tabsize=2,
+language=C++,
+emph={int,char,double,float,unsigned},
+                   emphstyle={\color{blue}}
+}
+
+\graphicspath{{images/}}
+\setpapersize{A4}
+\setmargins{2cm}       % margen izquierdo
+{1.5cm}                % margen superior
+{16.5cm}               % anchura del texto
+{23.42cm}              % altura del texto
+{10pt}                 % altura de los encabezados
+{1cm}                  % espacio entre el texto y los encabezados
+{0pt}                  % altura del pie de página
+{2cm}          
+
+\begin{document}
+	
+	%El nombre del archivo debe venir con el nombre de "Carné. Reporte [-Número de reporte-].pdf" sin importar el procesador de texto que utilicen
+	
+	\noindent\textbf{CI-1311 Laboratorio de Sistemas Operativos}\\
+	\textbf{Reporte lab 7}\\
+	\textbf{Steven Rojas Lizano $|$ A75623 $|$ Grupo 2}\\
+  \textbf{Denis Abarca Quesada $|$ A70014 $|$ Grupo 1}\\
+	\rule{400pt}{0.1pt}\\ 
+	
+	% Procedimientos
+	% La demostración debe ser con pantallazos que muestren toda la solución para el punto que corresponde
+	\section{Objetivos}
+	\begin{enumerate}
+	  \item Establecer el manejo de varios procesos en la memoria de NACHOS.
+	  \item Modificar el constructor de "AddrSpace" para permitir el uso de mapas de bits (bitmaps).
+    \item Definir las estructuras de datos para que puedan ser actualizadas por procesos concurrentes.
+	\end{enumerate}
+	
+  \section{ Encabezado de los programas de usuario }
+  \begin{enumerate}
+    \item  Cámbiese al directorio "userprog".
+    \item Analice el código de la clase "AddrSpace", especialmente su constructor.\\
+    En el contructor de la clase se encuentran las instrucciones para cargar un archivo ejecutable a memoria y llenar la tabla de páginas, la cual deberá ser modificada en este laboratorio
+    
+    \item Identifique los siguientes puntos (si es necesario agregue mensajes de despliegue): 
+      \begin{enumerate} 
+          \item  ¿Cómo es leído el encabezado del programa ejecutable NachOS? \\
+          El encabezado del archivo es leído mediante la instrucción:\\
+          $executable->ReadAt((char *)\&noffH, sizeof(noffH), 0);$
+          
+          \begin{enumerate}
+            \item ¿De qué tamaño es el encabezado?\\
+            El encabezado es un struct definido en el archivo Noff.h y su tamaño esta dado por los elementos que lo componen. los cuales a su vez estan constituidos por structs del tipo segment por lo que el tamaño del encabezado es de 40 bytes. 
+            \item ¿Cuál es el número mágico?\\
+            El número mágico se define también en Noff.h y tiene el valor 0xbadfad
+            \item Puede verificar el número con hexdump\\
+            \begin{lstlisting}
+hexdump -n 128 -C ../test/halt              
+            \end{lstlisting}
+            \item  Analice la estructura de los segmentos de NachOS y anote en su informe la estructura del encabezado de los programas ejecutables de MIPS.\\
+            Como se menciona anteriormente los segmentos en nachos son formados pro una estrutura que cuenta de tres enteros, tamaño del segmento, la dirección física de memoria y la dirección virtual.
+          \end{enumerate}
+          \item Cómo es establecido el tamaño del proceso?
+          \begin{enumerate}
+            \item ¿Cuál es el tamaño del segmento de código (T)?
+            \item ¿Cuál es el tamaño del segmento de datos (D)?
+            \item ¿Cuál es el tamaño de la pila (S)?
+            \item ¿Alguno de estos tamaños puede ser cero?
+          \end{enumerate}
+          \item Cómo el programa es cargado (del disco) a memoria?
+          \begin{enumerate}
+            \item ¿Cómo se realiza la lectura del disco?, Anote en su informe el nombre de la clase encargada de realizar esta lectura
+            \item ¿Cómo se determina el archivo de donde se realiza la lectura ?
+            \item ¿Cómo se indica la cantidad de bytes que se quiere leer?
+            \item ¿Cómo hacer para leer del archivo solo una página (128 bytes)?
+            \item ¿Cuál es la posición dentro del archivo de lectura?
+          \end{enumerate}
+          \item Cómo es la información colocada en la memoria?
+          \begin{enumerate}
+            \item ¿Cuál es la posición en la memoria?
+            \item ¿Cómo se puede cambiar esta dirección?
+            \item Anote en su informe la estrategia que va a seguir para colocar las páginas de 128 bytes leidas del archivo ejecutables en las posiciones de memoria correspondientes (frames) también de 128 bytes
+            \item Anote en su informe cómo va a manejar las páginas que se leen del archivo cuyo tamaño es menor que 128 bytes
+            \item Anote en su informe su estrategia para manejar páginas que pueden tener información de segmentos distintos, por ejemplo de código (T) y datos (D)
+          \end{enumerate}
+     \end{enumerate}
+     \end{enumerate}
+  \section{Funcionamiento de la clase "TranslationEntry"}
+     \begin{enumerate}
+       \item     Cada vez que el procesador (MIPS) realiza un acceso a memoria, se emplea un registro especial (pageTable) para realizar la traducción de las direcciones
+       \begin{enumerate}
+         \item         Como referencia estudiar el código en el archivo "machine/translate.cc" los métodos "Machine::Translate", "Machine::ReadMem" y "Machine::WriteMem"
+         \item También puede revisar la estructura de la máquina MIPS que se construye en "machine/machine.h"
+        \item También heche un vistazo por los métodos "AddrSpace::InitRegisters", "AddrSpace::RestoreState" y "AddrSpace::SaveState"
+        \item Explique como esta estructura (pageTable) es construida y llenada en el constructor de "AddrSpace"
+        \item Por ahora el mapeo se realiza asignando a cada página lógica de un proceso la misma página física, ( 0 -> 0, 1 -> 1, etc.). Para poder correr varios programas de usuario en la misma memoria física es necesario cambiar esta manera de asignación.\\
+        Esto se logra mediante el uso de un bitmap y asignandole las posiciones libres del bitmap al proceso.
+       \end{enumerate}
+     \end{enumerate} 
+     
+     %%---------------Bitmap-----------------------------
+  \section{Métodos de la clase BitMap}
+    \begin{enumerate}
+      \item     Escriba en su informe cómo crear un mapa de bits que represente la memoria del procesador MIPS que estamos simulando. Debe conocer el tamaño (ver machine/machine.h) en páginas de esa memoria. Este mapa de bits indicará si la página está ocupada o libre.
+      
+      \item Cómo esta es una estructura que puede ser compartida por varios hilos, escriba en su informe la manera en que hará que su uso sea de acceso exclusivo. No es necesario hacerlo para este laboratorio.\\
+      Esto puede ser logrado mediante el uso de un lock de la memoria, el cual no permitiría su uso mientras que no se haya terminado de utilizar
+
+    \end{enumerate}
+    %%-----------memoria Nachos---------------
+    \section{Administración de la memoria de NachOS para programas de usuario}
+    \begin{enumerate}
+      \item Cree una estructura de datos (BitMap) para representar las páginas de la memoria. Puede colocarla como una variable global en los archivos "system.h" y "system.cc" en el directorio "threads", su declaración debe ser similar a la de la variable "currentThread"
+      \begin{enumerate}
+        \item Para crear una variable global, debe agregarla en el archivo "system.h", por ejemplo "MiMapa" de esta manera 
+        \begin{lstlisting}
+#ifdef USER_PROGRAM
+#include "machine.h"
+extern Machine* machine;	// user program memory and registers
+
+extern BitMap MiMapa;		// Declares a global variable defined elsewhere
+...
+#endif
+        \end{lstlisting}
+        \item  Note que la declaración se puede hacer dentro un \#ifdef para hacerla condicional
+        \item  Además, la variable debe existir en el archivo "system.cc"
+        \begin{lstlisting}
+#ifdef USER_PROGRAM	// requires either FILESYS or FILESYS_STUB
+BitMap MiMapa;		// Variable definition, no extern prepended
+\end{lstlisting}          
+
+      \end{enumerate}
+      \item  Haga que NachOS utilice esta estructura para solicitar las páginas de memoria y actualizar la tabla de páginas del proceso. Por el momento, asegúrese de que el programa obtenga las mismas páginas que antes (0, 1, 2, etc.). No cambie la manera en que el programa es cargado en la memoria
+      \item Recuerde asignar las páginas de los datos no inicializados y la pila.
+      \item Verifique que el programa de usuario "halt" funcione correctamente. 
+    \end{enumerate}
+  \section{ Carga del programa en la memoria}
+  \begin{enumerate}
+    \item Explique la manera en que el programa es cargado a la memoria
+    \begin{enumerate}
+      \item     Explique qué hace el método ReadAt de la clase OpenFile
+      \begin{enumerate}
+        \item Explique la funcionalidad de los parámetros del método ReadAt
+      \end{enumerate}
+      \item     Indique porqué hay dos llamados a este método
+    \end{enumerate}
+    \item  Haga un diagrama que muestre la estructura de los programas de NachOS
+    \begin{enumerate}
+      \item Estructura de los programas de usuario de NachOS en la arquitectura MIPS, formato NOFF, "in-disk image" 
+      \item Estructura del encabezado de un programa de usuario de NachOS
+      \item Describa en su informe la manera en que el programa puede ser leído por páginas (128 bytes)
+      \begin{enumerate}
+        \item Haga que se lea el segmento de texto (código) página por página
+        \item Haga lo mismo que en el paso anterior para el segmento de datos
+        \item Considere el caso en que los segmentos no son múltiplos exactos de una página
+        \item Asegúrese de reservar páginas para datos no inicializados y pila
+      \end{enumerate}
+      \item  Coloque las páginas de código y datos (128 bytes) leídas del archivos la posición de memoria correspondiente
+      \begin{enumerate}
+        \item posición es la indicada por nuestro pequeño administrador de memoria, descrito en el punto 4). Está dada por la tabla de páginas del proceso
+      \end{enumerate}
+      \item Verifique que el programa de usuario "halt" funcione correctamente
+      \item ¿Cuáles cosas deben deshacerse cuando el programa finaliza (llama a Exit)? 
+    \end{enumerate}
+    \item  Pruebas (anote los resultados en su informe)
+    \begin {enumerate}
+      \item Haga que algunas páginas (ejemplo 0,2,4,6,8,10) dentro de su administrador aparezcan como ocupadas antes de cargar cualquier programa en memoria, ésto se puede realizar dentro de constructor de "AddrSpace"
+      \item Verifique el programa "halt" funcione
+      \item Compruebe que el programa addrspacetest funcione, recuerde guardarlo en el directorio "test"
+      \item Libere las páginas del primer punto
+      \item Corra de nuevo el programa "addrspacetest"
+    \end{enumerate}
+
+  \end{enumerate}
+
+    
+\end{document}

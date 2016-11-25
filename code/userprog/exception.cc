@@ -624,12 +624,8 @@ void ExceptionHandler(ExceptionType which){
 
 	    stats->numPageFaults++; 
 
-            int dir = machine->ReadRegister(BadVAddrReg);	//Lee la posicion que requeria
-
-		printf("%d\n", dir);
+        int dir = machine->ReadRegister(BadVAddrReg);	//Lee la posicion que requeria
 	    int page = dir / PageSize;  
-	    printf("%d\n",page);
-	    //fflush(stdout);
 	    if (currentThread->space->Cargar(page) == -1){	//Si no se puede cargar la pagina
 	             printf("No se puede cargar la pagina por falta de memoria");
 

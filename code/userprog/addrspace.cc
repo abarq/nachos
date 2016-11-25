@@ -236,6 +236,7 @@ void AddrSpace::RestoreState()
 // Carga una pagina no inicializada o en disco a memoria y modifica su estado
 int AddrSpace::Cargar(int virtualIndex)
 {       
+	printf("-------se esta cargando la memoria %d--------\n", virtualIndex);
     int resultado = -1;  
    // virtualIndex  =1;
     //Guardo el estado de la pagina
@@ -243,34 +244,33 @@ int AddrSpace::Cargar(int virtualIndex)
     //Si la pagina no esta inicializada o esta en el disco
     
     if(estado == No_inicializado || estado == En_Disco){
-	printf("primer if\n");
-	fflush(stdout);
+		printf("la ṕagina esta en disco o no inicializada \n");
+		fflush(stdout);
         //Asigna la pagina en el dico
         resultado = pageTable[virtualIndex].physicalPage = virtualMem->setPaginaDisco(this);
+        printf("se ha asignado la página %d \n", resultado);
 	
         if(resultado != -1){
-		printf("segundo if\n");
-	fflush(stdout);
-            //Si esta en el disco
-            if(estado == En_Disco)
-{		printf("tercer if");
-		fflush(stdout);
+            if(estado == En_Disco)    //Si esta en el disco
+			{
+				printf("La página se encuentra en disco por lo que se trae \n");
+				fflush(stdout);
                 //Traiga la pagina del disco y pongala en memoria
                 virtualMem->getPaginaDisco(this, virtualIndex);
-            //Si no esta inicializada
-}
-            else
-		printf("tercer else\n");
-		fflush(stdout);
-
-
-                //Lea la pagina de memoria y cargue la pagina
-                programa->ReadAt(&(machine->mainMemory[pageTable[virtualIndex].physicalPage * PageSize]), PageSize, inicioCodigo + virtualIndex * PageSize);
-
-		printf("%d\n", inicioCodigo);
-		fflush(stdout);
-		//programa->ReadAt(&(machine->mainMemory[0]), PageSize, inicioCodigo + virtualIndex * PageSize);
-
+			}
+            else//Si no esta inicializada
+			{
+				printf("La página se encuentra sin inicializar por lo que se trae de disco \n");
+				fflush(stdout);
+				//Lea la pagina de memoria y cargue la pagina
+				int dirtemp= inicioCodigo + virtualIndex * PageSize;
+				printf("incio del codigo en %d\nse carga la dirección de memoria %d\n",inicioCodigo,dirtemp);
+				int pafis =pageTable[virtualIndex].physicalPage;
+				printf("página fisica : %d\n",pafis);
+				char * memPrinp=&machine->mainMemory[pafis * PageSize];
+				printf("posición en memoria principal: %d\n",memPrinp);
+				programa->ReadAt(memPrinp, PageSize,dirtemp);
+			}
             //Indica que la pagina es valida en este momento
             pageTable[virtualIndex].valid = true;
             //Indica que la pagina se encuentra en memoria en este momento
