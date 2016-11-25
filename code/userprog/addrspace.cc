@@ -128,6 +128,8 @@ AddrSpace::AddrSpace(OpenFile *executable)
 	//Cargo la pagina 0 (Es en la que comienza la ejecución)*/
 	programa = executable;
 	Cargar(0);
+	Cargar(1);
+	Cargar(9);
     }
 }
 
@@ -236,7 +238,7 @@ void AddrSpace::RestoreState()
 // Carga una pagina no inicializada o en disco a memoria y modifica su estado
 int AddrSpace::Cargar(int virtualIndex)
 {       
-	printf("-------se esta cargando la memoria %d--------\n", virtualIndex);
+	printf("-------se esta accesando la memoria %d--------\n", virtualIndex);
     int resultado = -1;  
    // virtualIndex  =1;
     //Guardo el estado de la pagina
@@ -270,6 +272,7 @@ int AddrSpace::Cargar(int virtualIndex)
 				char * memPrinp=&machine->mainMemory[pafis * PageSize];
 				printf("posición en memoria principal: %d\n",memPrinp);
 				programa->ReadAt(memPrinp, PageSize,dirtemp);
+				printf("se ha guardado la página en memoria principal\n");
 			}
             //Indica que la pagina es valida en este momento
             pageTable[virtualIndex].valid = true;
