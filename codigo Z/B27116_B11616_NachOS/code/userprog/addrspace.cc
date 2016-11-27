@@ -19,6 +19,7 @@
 #include "system.h"
 #include "addrspace.h"
 #include "noff.h"
+       #include <unistd.h>
 
 //----------------------------------------------------------------------
 // SwapHeader

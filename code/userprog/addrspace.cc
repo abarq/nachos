@@ -19,6 +19,7 @@
 #include "system.h"
 #include "addrspace.h"
 #include "memoriaVirtual.h"
+       #include <unistd.h>
 
 
 MemoriaVirtual * virtualMem = new MemoriaVirtual();
@@ -231,6 +232,7 @@ int AddrSpace::cargarDeDisco(int page){
 int AddrSpace::Cargar(int dir)
 {       
 	int page = dir / PageSize;  
+	sleep(1);
 
 	printf("-------se esta accesando la memoria %d, con estado %d -----\n", dir,pageTable[page].state );
     int resultado = -1;  
@@ -253,23 +255,31 @@ int AddrSpace::Cargar(int dir)
 				printf("La página se encuentra en memoria por lo que se pasa a la TLB \n");
 
 				while(machine->tlb[machine->TLBIndex].use){
+					printf("se reemplaza la entrada %d de la TLB",machine->TLBIndex);
 					machine->tlb[machine->TLBIndex].use = false;
 					machine->TLBIndex++;
-					machine->TLBIndex=machine->TLBIndex%TLBSize; //se mantienen una rotacio
+					machine->TLBIndex=machine->TLBIndex%TLBSize; //se mantienen una rotacion
 				}
-				
+				if(machine->tlb[machine->TLBIndex].dirty)
+				{
+					printf("la pagina a reemplazar esta sucia\n");
+					machine->tlb[machine->TLBIndex].state=En_SWAP;
+
+				}
 				pageTable[page].state=En_TLB;
-				pageTable[page].valid=true;
-				pageTable[page].use=true;
-				machine->tlb[machine->TLBIndex]=pageTable[page];
+
 				break;
-				
+
 		}
+		
 		if (pageTable[page].physicalPage==-1)
 				pageTable[page].state=No_inicializado;
 	}
+	pageTable[page].valid=true;
+	pageTable[page].use=true;
+	machine->tlb[machine->TLBIndex]=pageTable[page];
 	resultado= pageTable[page].state;
-		printf("-------se ha cargado la pagina fisica %d en el TLB  %d--------\n",resultado, dir);
+		printf("-------se ha cargado la pagina fisica %d en el TLB  con estado %d y direccion %d--------\n",pageTable[page].physicalPage,resultado, dir);
 
     return resultado;
 }

@@ -108,7 +108,7 @@ public:
 }
 
     //Consigue una pagina del disco, la coloca en la memoria y modifica su estado
-    int getPaginaDisco(AddrSpace * requester, int pageTableIndex){
+    int getPaginaDiscogetPaginaDisco(AddrSpace * requester, int pageTableIndex){
 		
 		
 		
@@ -128,24 +128,5 @@ public:
         }
         return respuesta;
     }
-    /*
-    //Consigue una pagina del disco, la coloca en la memoria y modifica su estado
-    int getPaginaDisco(AddrSpace * requester, int pageTableIndex){
-        int respuesta = -1;
-        int swapIndex = requester->pageTable[pageTableIndex].swapIndex;
-        if (memDisco->Test(swapIndex)){ //Verifica que la localidad del disco este ocupada
-            //Lee la pagina del disco
-            respuesta = archivoVM->ReadAt(&(machine->mainMemory[requester->pageTable[pageTableIndex].physicalPage * PageSize]),PageSize,swapIndex * PageSize);
-            //Indica que hay una posicion lista en el disco
-            memDisco->Clear(swapIndex);
-            //Indica que es una posicion valida
-            requester->pageTable[pageTableIndex].valid = true;
-            //Indica que la pagina se encuentra en el disco
-            requester->pageTable[pageTableIndex].state = En_Memoria;
-            //Indica que no tiene posicion en el disco
-            requester->pageTable[pageTableIndex].swapIndex = -1;
-        }
-        return respuesta;
-    }
-    * */
+    
 };
