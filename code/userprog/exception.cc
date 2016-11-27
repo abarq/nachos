@@ -327,7 +327,7 @@ void ExeAux (void* nada){
 	printf("Se esta ejecutando el archivo %s\n", nombreEx);
 
 	OpenFile *executable = fileSystem->Open(nombreEx);       // Abro el ejecutable
-	AddrSpace *space = new AddrSpace(executable);
+	AddrSpace *space = new AddrSpace(executable,nombreEx);
 	currentThread->space = space;                            // Le asigno el address space
 
 	delete executable;
@@ -619,25 +619,18 @@ void ExceptionHandler(ExceptionType which){
        break;
 
        case PageFaultException:
-	   // printf("Estoy en exception\n");
-	   // fflush(stdout);
-
+		
+		
 	    stats->numPageFaults++; 
 
         int dir = machine->ReadRegister(BadVAddrReg);	//Lee la posicion que requeria
-	    int page = dir / PageSize;  
-	    if (currentThread->space->Cargar(page) == -1){	//Si no se puede cargar la pagina
-	             printf("No se puede cargar la pagina por falta de memoria");
+        printf("se ha ingresado a la excepcion de pagina faltante: %d\n",dir);
+
+	    if (currentThread->space->Cargar(dir) == -1){	//Si no se puede cargar la pagina
+	             printf("No se puede cargar la pagina por falta de memoria\n");
 
 	    }
 	    break;
-
-    /*   default:
-          printf( "Unexpected exception %d\n", which );
-
-          break;
-
-	}*/
 	}
 }
 

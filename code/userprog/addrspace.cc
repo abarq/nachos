@@ -18,7 +18,6 @@
 #include "copyright.h"
 #include "system.h"
 #include "addrspace.h"
-#include "noff.h"
 #include "memoriaVirtual.h"
 
 
@@ -61,10 +60,10 @@ SwapHeader (NoffHeader *noffH)
 //	"executable" is the file containing the object code to load into memory
 //----------------------------------------------------------------------
 
-AddrSpace::AddrSpace(OpenFile *executable)
+AddrSpace::AddrSpace(OpenFile *executable, const char *filename)
 {
-    NoffHeader noffH;
-    unsigned int i, size;
+    unsigned int i, size;\
+    this->filename= filename;
 
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
@@ -86,14 +85,15 @@ AddrSpace::AddrSpace(OpenFile *executable)
 
     DEBUG('a', "Initializing address space, num pages %d, size %d\n", 
 					numPages, size);
-
+   	printf("tamaño de segmento de codigo: %d\n",noffH.code.size);
+	printf("tamaño de segmento de datos incializados: %d\n",noffH.initData.size);
+	printf("tamaño de segmento de datos no inicializados: %d\n",noffH.uninitData.size);
     int pagEncontrada;
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++) {
 
-	pageTable[i].virtualPage = i;	// for now, virtual page # = phys page #
-        //pagEncontrada = pageTableMap->Find();
+	pageTable[i].virtualPage = i;	
 	pageTable[i].physicalPage = -1;
 	#ifdef VM
 		pageTable[i].valid = false;
@@ -101,36 +101,24 @@ AddrSpace::AddrSpace(OpenFile *executable)
 		pageTable[i].valid = true;
 	#endif
         
-	//Indica que la pagina no esta inicializada (En_Disco o En_Memoria)		
+	//Indica que la pagina no esta inicializada (En_Disco DE LINUX)		
 	pageTable[i].state = No_inicializado;
-        //Indica que no tiene posicion en el archivo de memoria virtual
+    //Indica que no tiene posicion en el archivo de memoria virtual
 	pageTable[i].swapIndex = -1;
 	pageTable[i].use = false;
 	pageTable[i].dirty = false;
 	pageTable[i].readOnly = false;  // if the code segment was entirely on 
-					// a separate page, we could set its 
-					// pages to be read-only
-
-        //memset(machine->mainMemory + (pagEncontrada * PageSize), 0, PageSize);           // Inicializa con 0s el area
 
 	#ifdef VM
 		
 	#else
         	executable->ReadAt(&(machine->mainMemory[pagEncontrada*PageSize]), PageSize, (i*PageSize)+noffH.code.inFileAddr); // 			Copia la  informacion en memoria
 	#endif
-
-	inicioCodigo = noffH.code.inFileAddr;
-	/*char * filename = new char[strlen(file)];
-    	//Escribo el nombre del archivo en un vector para que se pueda pasar como parametro
-    	strcpy(filename, file);*/
-    	//Abro en ejecutable    
-	//programa = fileSystem->Open(filename);
-	//Cargo la pagina 0 (Es en la que comienza la ejecución)*/
-	programa = executable;
-	Cargar(0);
-	Cargar(1);
-	Cargar(9);
     }
+	inicioCodigo = noffH.code.inFileAddr;
+	programa = executable;
+	Cargar(0);	
+
 }
 
 //--------------------------------------------------------------------------
@@ -236,62 +224,53 @@ void AddrSpace::RestoreState()
 }
 
 // Carga una pagina no inicializada o en disco a memoria y modifica su estado
-int AddrSpace::Cargar(int virtualIndex)
-{       
-	printf("-------se esta accesando la memoria %d--------\n", virtualIndex);
-    int resultado = -1;  
-   // virtualIndex  =1;
-    //Guardo el estado de la pagina
-    int estado = pageTable[virtualIndex].state;
-    //Si la pagina no esta inicializada o esta en el disco
-    
-    if(estado == No_inicializado || estado == En_Disco){
-		printf("la ṕagina esta en disco o no inicializada \n");
-		fflush(stdout);
-        //Asigna la pagina en el dico
-        resultado = pageTable[virtualIndex].physicalPage = virtualMem->setPaginaDisco(this);
-        printf("se ha asignado la página %d \n", resultado);
+
+int AddrSpace::cargarDeDisco(int page){
 	
-        if(resultado != -1){
-            if(estado == En_Disco)    //Si esta en el disco
-			{
-				printf("La página se encuentra en disco por lo que se trae \n");
-				fflush(stdout);
-                //Traiga la pagina del disco y pongala en memoria
-                virtualMem->getPaginaDisco(this, virtualIndex);
-			}
-            else//Si no esta inicializada
-			{
-				printf("La página se encuentra sin inicializar por lo que se trae de disco \n");
-				fflush(stdout);
-				//Lea la pagina de memoria y cargue la pagina
-				int dirtemp= inicioCodigo + virtualIndex * PageSize;
-				printf("incio del codigo en %d\nse carga la dirección de memoria %d\n",inicioCodigo,dirtemp);
-				int pafis =pageTable[virtualIndex].physicalPage;
-				printf("página fisica : %d\n",pafis);
-				char * memPrinp=&machine->mainMemory[pafis * PageSize];
-				printf("posición en memoria principal: %d\n",memPrinp);
-				programa->ReadAt(memPrinp, PageSize,dirtemp);
-				printf("se ha guardado la página en memoria principal\n");
-			}
-            //Indica que la pagina es valida en este momento
-            pageTable[virtualIndex].valid = true;
-            //Indica que la pagina se encuentra en memoria en este momento
-            pageTable[virtualIndex].state = En_Memoria;
-        }
-    }
-    if(pageTable[virtualIndex].state == En_Memoria){
-	int i=0;
-	while(machine->tlb[i].use){
-	    machine->tlb[i].use = false;
-	    if(i < TLBSize)
-		i++;
-	    else
-		i=0;
+}
+int AddrSpace::Cargar(int dir)
+{       
+	int page = dir / PageSize;  
+
+	printf("-------se esta accesando la memoria %d, con estado %d -----\n", dir,pageTable[page].state );
+    int resultado = -1;  
+    //Guardo el estado de la pagina
+    while (pageTable[page].state != En_TLB)
+    {
+		switch (pageTable[page].state){
+			case No_inicializado: //si la pagina no se encuentra en disco se le asigna su valor
+				printf("Pagina no esta inicializada: %d\n",pageTable[page].physicalPage );
+				pageTable[page].physicalPage = virtualMem->setPaginaDisco(this,page);
+				pageTable[page].state=En_Memoria;
+				printf("se ha asignado la página %d \n", pageTable[page].physicalPage );
+				break;
+			case En_SWAP: //si la pagina esta en disco se lee y se copia al pagetable del proceso
+				printf("La página se encuentra en SWAP por lo que se trae a memoria \n");
+				virtualMem->getPaginaDisco(this, page);
+
+				break;
+			case En_Memoria: //si la pagina se encuentra en memoria se debe pasar al tlb de machine
+				printf("La página se encuentra en memoria por lo que se pasa a la TLB \n");
+
+				while(machine->tlb[machine->TLBIndex].use){
+					machine->tlb[machine->TLBIndex].use = false;
+					machine->TLBIndex++;
+					machine->TLBIndex=machine->TLBIndex%TLBSize; //se mantienen una rotacio
+				}
+				
+				pageTable[page].state=En_TLB;
+				pageTable[page].valid=true;
+				pageTable[page].use=true;
+				machine->tlb[machine->TLBIndex]=pageTable[page];
+				break;
+				
+		}
+		if (pageTable[page].physicalPage==-1)
+				pageTable[page].state=No_inicializado;
 	}
-	machine->tlb[i] = pageTable[virtualIndex];
-	resultado = machine->tlb[i].physicalPage;
-    }
+	resultado= pageTable[page].state;
+		printf("-------se ha cargado la pagina fisica %d en el TLB  %d--------\n",resultado, dir);
+
     return resultado;
 }
 

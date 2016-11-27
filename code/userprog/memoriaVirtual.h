@@ -57,7 +57,7 @@ public:
     }
 
     //Consigue una pagina de la memoria, la pone en el disco y modifica su estado
-    int setPaginaDisco(AddrSpace *requester) {
+    int setPaginaDisco(AddrSpace *requester,int page) {
 		int swapPageIndex = -1;	
 		//Busca un lugar en la memoria para colocar la pagina, (Pregunta si hay espacio)
         int memIndex = memFisica->Find();
@@ -65,7 +65,7 @@ public:
         printf("se tiene el indice %d de memoria fisica\n",memIndex);
         if (memIndex  == -1) {
             //Si no hay espacio, busca una pagina para el remplazo
-            memIndex = seleccionarPaginaVictima();
+           memIndex = seleccionarPaginaVictima();
            printf("dado que era -1 se seleccióno una victima\n se tiene el indice %d de memoria fisica\n",memIndex);
 
             owner = (AddrSpace*)padre[memIndex];
@@ -87,12 +87,48 @@ public:
                     break;
                 }
             }
-        }
+        }else{
+
+			//se trae la pagina de memoria de linux a la memoria principal de la maquina
+				printf("página fisica : %d\n",memIndex);\
+				fflush(stdout);
+				char * memPrinp=&machine->mainMemory[memIndex * PageSize];
+				printf("posición en memoria principal: %d\n",memPrinp);
+				int dirtemp= requester->noffH.code.inFileAddr+page*PageSize; 
+				printf("posición en memoria nachos: %d\n",dirtemp);
+				// se vuelve a  abrir el programa
+				OpenFile *executable = fileSystem->Open(requester->filename);
+				executable->ReadAt(memPrinp, PageSize,dirtemp); //se copia los datos a la memoria principal.
+				printf("se ha copiado la pagina al disco de nachos\n");
+			}
+
         if (memIndex != -1) 
             padre[memIndex] = requester;
         return memIndex;
 }
 
+    //Consigue una pagina del disco, la coloca en la memoria y modifica su estado
+    int getPaginaDisco(AddrSpace * requester, int pageTableIndex){
+		
+		
+		
+        int respuesta = -1;
+        int swapIndex = requester->pageTable[pageTableIndex].swapIndex;
+        if (memDisco->Test(swapIndex)){ //Verifica que la localidad del disco este ocupada
+            //Lee la pagina del disco
+            respuesta = archivoVM->ReadAt(&(machine->mainMemory[requester->pageTable[pageTableIndex].physicalPage * PageSize]),PageSize,swapIndex * PageSize);
+            //Indica que hay una posicion lista en el disco
+            memDisco->Clear(swapIndex);
+            //Indica que es una posicion valida
+            requester->pageTable[pageTableIndex].valid = true;
+            //Indica que la pagina se encuentra en el disco
+            requester->pageTable[pageTableIndex].state = En_Memoria;
+            //Indica que no tiene posicion en el disco
+            requester->pageTable[pageTableIndex].swapIndex = -1;
+        }
+        return respuesta;
+    }
+    /*
     //Consigue una pagina del disco, la coloca en la memoria y modifica su estado
     int getPaginaDisco(AddrSpace * requester, int pageTableIndex){
         int respuesta = -1;
@@ -111,4 +147,5 @@ public:
         }
         return respuesta;
     }
+    * */
 };

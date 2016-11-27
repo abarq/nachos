@@ -106,6 +106,8 @@ class Instruction {
 
 class Machine {
   public:
+      int TLBIndex; //indice del estado del TLB para ser recorrido 
+
     Machine(bool debug);	// Initialize the simulation of the hardware
 				// for running user programs
     ~Machine();			// De-allocate the data structures

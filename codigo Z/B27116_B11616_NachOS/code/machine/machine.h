@@ -109,6 +109,7 @@ class Machine {
     Machine(bool debug);	// Initialize the simulation of the hardware
 				// for running user programs
     ~Machine();			// De-allocate the data structures
+    int TLBIndex;
 
 // Routines callable by the Nachos kernel
     void Run();	 		// Run a user program
